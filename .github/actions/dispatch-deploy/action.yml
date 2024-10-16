@@ -1,0 +1,82 @@
+--- # Dispatch to deploy workflow for deployment.
+name: 'Dispatch to deploy workflow'
+description: 'Dispatches deployment to a separate workflow'
+inputs:
+  CLOUD_FORMATION_STACK:
+    description: 'The Cloud Formation stack to deploy as'
+    required: true
+  CLOUD_FORMATION_TEMPLATE_FILE:
+    description: 'The Cloud Formation file to deploy'
+    required: true
+  CLOUDFORMATION_SNS_ARN:
+    description: 'SSN Notification ARN'
+    required: false
+  DOCKER_APP_OWNER:
+    description: 'docker app owner'
+    required: true
+  DOCKER_APP_NAME:
+    description: 'docker app name'
+    required: true
+  API_HOST:
+    description: 'Api Host'
+    required: false
+  API_PREFIX:
+    description: 'API Prefix'
+    required: false
+  AWS_LOAD_BALANCER_HOSTNAME:
+    description: "AWS Load Balancer match hostname"
+    required: false
+  AWS_LOAD_BALANCER_PRIORITY:
+    description: "AWS Load Balancer match priority"
+    required: true
+  AWS_CONTAINER_REGISTRY:
+    description: "AWS container registry to retrieve package from"
+    required: true
+  BUILD_VERSION:
+    description: "Build Version"
+    required: true
+  GITHUB_TOKEN:
+    description: 'github token for accessing github'
+    required: true
+    default: ${{github.token}}
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Log parameters"
+      shell: bash
+      run: |
+        echo "CLOUD_FORMATION_STACK: ${{inputs.CLOUD_FORMATION_STACK}}"
+        echo "CLOUD_FORMATION_TEMPLATE_FILE: ${{inputs.CLOUD_FORMATION_TEMPLATE_FILE}}"
+        echo "DOCKER_APP_OWNER: ${{inputs.DOCKER_APP_OWNER}}"
+        echo "DOCKER_APP_NAME: ${{inputs.DOCKER_APP_NAME}}"
+        echo "BUILD_VERSION: ${{inputs.BUILD_VERSION}}"
+        echo "API_HOST: ${{inputs.API_HOST}}"
+        echo "API_PREFIX: ${{inputs.API_PREFIX}}"
+        echo "AWS_LOAD_BALANCER_HOSTNAME: ${{inputs.AWS_LOAD_BALANCER_HOSTNAME}}"
+        echo "AWS_CONTAINER_REGISTRY: ${{inputs.AWS_CONTAINER_REGISTRY}}"
+        echo "AWS_LOAD_BALANCER_PRIORITY: ${{inputs.AWS_LOAD_BALANCER_PRIORITY}}"
+
+    - name: "Trigger Deployment Workflow"
+      uses: actions/github-script@v6
+      with:
+        github-token: ${{ inputs.GITHUB_TOKEN }}
+        script: |
+          github.rest.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'deploy.yml',
+            ref: 'main',
+            inputs: {
+                CLOUD_FORMATION_STACK: "${{inputs.CLOUD_FORMATION_STACK}}",
+                CLOUD_FORMATION_TEMPLATE_FILE: "${{inputs.CLOUD_FORMATION_TEMPLATE_FILE}}",
+                DOCKER_APP_OWNER: "${{inputs.DOCKER_APP_OWNER}}",
+                DOCKER_APP_NAME: "${{inputs.DOCKER_APP_NAME}}",
+                BUILD_VERSION: "${{inputs.BUILD_VERSION}}",
+                API_HOST: "${{inputs.API_HOST}}",
+                API_PREFIX: "${{inputs.API_PREFIX}}",
+                AWS_LOAD_BALANCER_HOSTNAME: "${{inputs.AWS_LOAD_BALANCER_HOSTNAME}}",
+                AWS_CONTAINER_REGISTRY: "${{inputs.AWS_CONTAINER_REGISTRY}}",
+                AWS_LOAD_BALANCER_PRIORITY: "${{inputs.AWS_LOAD_BALANCER_PRIORITY}}",
+              }
+          })

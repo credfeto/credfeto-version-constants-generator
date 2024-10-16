@@ -1,0 +1,73 @@
+--- # Publishes a Dotnet app to an executable
+name: 'Publishes a Dotnet app to an executable'
+description: 'Publishes a Dotnet app to an executable'
+inputs:
+  # General
+  PRODUCTION_BUILD:
+    description: 'Whether to build a production build'
+    required: true
+
+  BUILD_VERSION:
+    description: 'Build version'
+    required: true
+
+  RELEASE_NOTES:
+    description: 'Release notes'
+    required: false
+
+  PLATFORM:
+    description: 'Release notes'
+    required: true
+
+  PROJECT_TO_PUBLISH:
+    description: 'Package (root) to deploy'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+  # TODO: Investigate changing the settings for these to be project settings like with "-p:PublishTrimmed=False" so can
+  #       optimise the projects that better suit the settings.
+  #
+  # -p:PublishAot=false
+  # -p:PublishReadyToRun=False
+  - name: "Dotnet: Publish"
+    working-directory: ${{github.workspace}}/src/${{inputs.PROJECT_TO_PUBLISH}}
+    shell: bash
+    run: |
+      dotnet publish \
+                --no-restore \
+                -warnaserror \
+                --configuration:Release \
+                "-r:${{inputs.PLATFORM}}" \
+                --self-contained \
+                -nodeReuse:False \
+                -p:NoWarn=NETSDK1179 \
+                -p:SuppressNETCoreSdkPreviewMessage=true \
+                -p:PublishSingleFile=true \
+                -p:PublishAot=false \
+                -p:PublishReadyToRun=False \
+                -p:PublishReadyToRunShowWarnings=True \
+                -p:DisableSwagger=False \
+                -p:TreatWarningsAsErrors=True \
+                -p:IncludeNativeLibrariesForSelfExtract=false \
+                "-p:Version=${{inputs.BUILD_VERSION}}" \
+                "-p:FFPublishing=True" \
+                "-p:SolutionDir=..\\" \
+                "-p:IsProduction=${{inputs.PRODUCTION_BUILD}}" \
+                --output ${{github.workspace}}/server-dist/${{inputs.PLATFORM}} \
+                ${{env.DOTNET_RELEASE_DEFINES}}
+    env:
+      ReleaseNotes: ${{inputs.RELEASE_NOTES}}
+      DOTNET_ROOT: "${{github.workspace}}/.dotnet/${{github.sha}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
+      DOTNET_INSTALL_DIR: "${{github.workspace}}/.dotnet/${{github.sha}}-${{github.run_id}}-${{github.run_number}}-${{github.run_attempt}}"
+      DOTNET_MULTILEVEL_LOOKUP: "false"
+      DOTNET_NOLOGO: "true"
+      DOTNET_PRINT_TELEMETRY_MESSAGE: "false"
+      DOTNET_JitCollect64BitCounts: "1"
+      DOTNET_ReadyToRun: "0"
+      DOTNET_TC_QuickJitForLoops: "1"
+      DOTNET_TC_CallCountingDelayMs: "0"
+      DOTNET_TieredPGO: "1"
+      MSBUILDTERMINALLOGGER: "auto"
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
