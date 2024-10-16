@@ -12,9 +12,9 @@ public sealed class VersionTest : LoggingTestBase
     }
 
     [Fact]
-    public void FileVersion()
+    public void Version()
     {
-        this.Output.WriteLine($"Version: {VersionInformation.FileVersion}");
+        this.Output.WriteLine($"Version: {VersionInformation.Version}");
     }
 
     [Fact]

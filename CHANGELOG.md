@@ -7,6 +7,8 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 
 ## [Unreleased]
 ### Added
+- Extracted additional assembly properties
+- Included pre-release tag in the version
 ### Fixed
 ### Changed
 - Dependencies - Updated Meziantou.Analyzer to 2.0.170
