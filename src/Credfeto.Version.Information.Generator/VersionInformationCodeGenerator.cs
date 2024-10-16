@@ -8,15 +8,6 @@ namespace Credfeto.Version.Information.Generator;
 public sealed class VersionInformationCodeGenerator : ISourceGenerator
 {
     private const string CLASS_NAME = "VersionInformation";
-    private readonly string _generatorVersion;
-    private readonly ISyntaxContextReceiver _receiver = new SyntaxContextReciever();
-
-    public VersionInformationCodeGenerator()
-    {
-        this._generatorVersion = this._receiver.GetType()
-                                     .Assembly.GetName()
-                                     .Version.ToString();
-    }
 
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -28,12 +19,12 @@ public sealed class VersionInformationCodeGenerator : ISourceGenerator
         string product = GetAssemblyProduct(context: context, assemblyNamespace: assemblyNamespace);
         string version = GetAssemblyVersion(context);
 
-        CodeBuilder source = this.BuildSource(assemblyNamespace: assemblyNamespace, version: version, product: product);
+        CodeBuilder source = BuildSource(assemblyNamespace: assemblyNamespace, version: version, product: product);
 
         context.AddSource($"{assemblyNamespace}.{CLASS_NAME}.generated.cs", sourceText: source.Text);
     }
 
-    private CodeBuilder BuildSource(string assemblyNamespace, string version, string product)
+    private static CodeBuilder BuildSource(string assemblyNamespace, string version, string product)
     {
         CodeBuilder source = new();
 
@@ -43,7 +34,7 @@ public sealed class VersionInformationCodeGenerator : ISourceGenerator
               .AppendBlankLine()
               .AppendLine($"namespace {assemblyNamespace};")
               .AppendBlankLine()
-              .AppendLine($"[GeneratedCode(tool: \"{typeof(VersionInformationCodeGenerator).FullName}\", version: \"{this._generatorVersion}\")]");
+              .AppendLine($"[GeneratedCode(tool: \"{RuntimeVersionInformation.ToolName}\", version: \"{RuntimeVersionInformation.GeneratorVersion}\")]");
 
         using (source.StartBlock("internal static class VersionInformation"))
         {
