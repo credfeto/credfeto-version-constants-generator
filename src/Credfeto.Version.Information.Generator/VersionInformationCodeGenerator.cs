@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Reflection;
 using Credfeto.Version.Information.Generator.Builders;
 using Credfeto.Version.Information.Generator.Helpers;
@@ -54,6 +55,7 @@ public sealed class VersionInformationCodeGenerator : ISourceGenerator
         return source;
     }
 
+    [Conditional("DEBUG")]
     private static void DumpAttributes(ImmutableDictionary<string, string> attributes, CodeBuilder source)
     {
         foreach (string key in attributes.Keys)
