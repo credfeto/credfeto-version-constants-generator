@@ -11,6 +11,7 @@ public sealed class VersionInformationCodeGenerator : ISourceGenerator
 
     public void Initialize(GeneratorInitializationContext context)
     {
+        // nothing to do here - no initialization required
     }
 
     public void Execute(GeneratorExecutionContext context)

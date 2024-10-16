@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Credfeto.Version.Information.Generator;
+namespace Credfeto.Version.Information.Generator.Helpers;
 
 internal static class RuntimeVersionInformation
 {
