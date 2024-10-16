@@ -9,8 +9,27 @@ ProjectSection(SolutionItems) = preProject
 	global.json = global.json
 	..\CHANGELOG.md = ..\CHANGELOG.md
 	..\README.md = ..\README.md
-	FunFair.props = FunFair.props
+	KeepGeneratedFiles.props = KeepGeneratedFiles.props
+	SourceGenerator.props = SourceGenerator.props
 EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credfeto.Version.Information.Generator", "Credfeto.Version.Information.Generator\Credfeto.Version.Information.Generator.csproj", "{CDDA7E05-B49B-41F5-9C4B-F8B3E2859F43}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Credfeto.Version.Information.Example.Tests", "Credfeto.Version.Information.Example.Tests\Credfeto.Version.Information.Example.Tests.csproj", "{126F545F-9BA8-4215-B34B-62E621A54931}"
+EndProject
 Global
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{126F545F-9BA8-4215-B34B-62E621A54931}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{126F545F-9BA8-4215-B34B-62E621A54931}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{126F545F-9BA8-4215-B34B-62E621A54931}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{126F545F-9BA8-4215-B34B-62E621A54931}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDDA7E05-B49B-41F5-9C4B-F8B3E2859F43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDDA7E05-B49B-41F5-9C4B-F8B3E2859F43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDDA7E05-B49B-41F5-9C4B-F8B3E2859F43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDDA7E05-B49B-41F5-9C4B-F8B3E2859F43}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
 EndGlobal
