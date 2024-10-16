@@ -12,8 +12,14 @@ public sealed class VersionTest : LoggingTestBase
     }
 
     [Fact]
-    public void Test1()
+    public void FileVersion()
     {
-        this.Output.WriteLine("Hello World");
+        this.Output.WriteLine($"Version: {VersionInformation.FileVersion}");
+    }
+
+    [Fact]
+    public void Product()
+    {
+        this.Output.WriteLine($"Product: {VersionInformation.Product}");
     }
 }

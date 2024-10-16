@@ -1,4 +1,5 @@
 ﻿using Credfeto.Version.Information.Generator.Builders;
+using Credfeto.Version.Information.Generator.Helpers;
 using Microsoft.CodeAnalysis;
 
 namespace Credfeto.Version.Information.Generator;
@@ -7,42 +8,69 @@ namespace Credfeto.Version.Information.Generator;
 public sealed class VersionInformationCodeGenerator : ISourceGenerator
 {
     private const string CLASS_NAME = "VersionInformation";
+    private readonly string _generatorVersion;
+    private readonly ISyntaxContextReceiver _receiver = new SyntaxContextReciever();
+
+    public VersionInformationCodeGenerator()
+    {
+        this._generatorVersion = this._receiver.GetType()
+                                     .Assembly.GetName()
+                                     .Version.ToString();
+    }
 
     public void Initialize(GeneratorInitializationContext context)
     {
-        // Nothing to do here
     }
 
     public void Execute(GeneratorExecutionContext context)
     {
-        if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(key: "build_property.AssemblyNamespace", out string? assemblyNamespace))
+        string assemblyNamespace = GetAssemblyNamespace(context);
+        string product = GetAssemblyProduct(context: context, assemblyNamespace: assemblyNamespace);
+        string version = GetAssemblyVersion(context);
+
+        CodeBuilder source = this.BuildSource(assemblyNamespace: assemblyNamespace, version: version, product: product);
+
+        context.AddSource($"{assemblyNamespace}.{CLASS_NAME}.generated.cs", sourceText: source.Text);
+    }
+
+    private CodeBuilder BuildSource(string assemblyNamespace, string version, string product)
+    {
+        CodeBuilder source = new();
+
+        source.AppendFileHeader()
+              .AppendLine("using System;")
+              .AppendLine("using System.CodeDom.Compiler;")
+              .AppendBlankLine()
+              .AppendLine($"namespace {assemblyNamespace};")
+              .AppendBlankLine()
+              .AppendLine($"[GeneratedCode(tool: \"{typeof(VersionInformationCodeGenerator).FullName}\", version: \"{this._generatorVersion}\")]");
+
+        using (source.StartBlock("internal static class VersionInformation"))
         {
-            return;
+            source.AppendLine($"public const string FileVersion = \"{version}\";");
+            source.AppendLine($"public const string Product = \"{product}\";");
         }
 
-        if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(key: "build_property.Product", out string? product))
+        return source;
+    }
+
+    private static string GetAssemblyProduct(in GeneratorExecutionContext context, string assemblyNamespace)
+    {
+        if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(key: "build_property.rootnamespace", out string? product))
         {
-            return;
+            product = assemblyNamespace;
         }
 
-        if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(key: "build_property.Version", out string? version))
-        {
-            version = "1.0.0";
-        }
+        return product;
+    }
 
-        CodeBuilder cb = new();
+    private static string GetAssemblyVersion(in GeneratorExecutionContext context)
+    {
+        return context.Compilation.Assembly.Identity.Version.ToString();
+    }
 
-        cb.AppendLine("using System");
-        cb.AppendBlankLine();
-        cb.AppendLine($"namespace {assemblyNamespace}");
-        cb.AppendBlankLine();
-
-        using (cb.StartBlock("internal static class VersionInformation"))
-        {
-            cb.AppendLine($"public const string ProgramVersion = \"{version}\";");
-            cb.AppendLine($"public const string Product = \"{product}\";");
-        }
-
-        context.AddSource($"{assemblyNamespace}.{CLASS_NAME}.generated.cs", sourceText: cb.Text);
+    private static string GetAssemblyNamespace(in GeneratorExecutionContext context)
+    {
+        return context.Compilation.Assembly.Identity.Name;
     }
 }

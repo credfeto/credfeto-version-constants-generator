@@ -39,9 +39,17 @@
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnforceExtendedAnalyzerRules>false</EnforceExtendedAnalyzerRules>
   </PropertyGroup>
-  <!--  <ItemGroup>-->
-  <!--    <ProjectReference Include="..\Credfeto.Version.Information.Generator\Credfeto.Version.Information.Generator.csproj" />-->
-  <!--  </ItemGroup>-->
+  <PropertyGroup>
+    <Company>Mark Ridgwell</Company>
+    <Copyright>Mark Ridgwell</Copyright>
+    <PackageLicense>https://raw.githubusercontent.com/credfeto/credfeto-credfeto-versioninfo/main/LICENSE</PackageLicense>
+    <PackageReleaseNotes>$(ReleaseNotes)</PackageReleaseNotes>
+    <Product>Source Generation</Product>
+  </PropertyGroup>
+  <Import Project="$(SolutionDir)KeepGeneratedFiles.props" Condition="Exists('$(SolutionDir)KeepGeneratedFiles.props')"/>
+  <ItemGroup>
+    <ProjectReference Include="..\Credfeto.Version.Information.Generator\Credfeto.Version.Information.Generator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FunFair.Test.Common" Version="6.1.69.630"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1"/>
