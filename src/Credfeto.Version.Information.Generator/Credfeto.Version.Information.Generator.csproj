@@ -64,9 +64,6 @@
   </PropertyGroup>
   <Import Project="$(SolutionDir)SourceGenerator.props" />
   <ItemGroup>
-    <PackageReference Include="Credfeto.Enumeration.Source.Generation.Attributes" Version="1.1.7.384" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="AsyncFixer" Version="1.6.0" PrivateAssets="All" ExcludeAssets="runtime" />
     <PackageReference Include="codecracker.CSharp" Version="1.1.0" PrivateAssets="All" ExcludeAssets="runtime" />
     <PackageReference Include="Credfeto.Enumeration.Source.Generation" Version="1.1.7.384" PrivateAssets="All" ExcludeAssets="runtime" />
