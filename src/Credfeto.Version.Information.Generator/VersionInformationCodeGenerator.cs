@@ -39,8 +39,8 @@ public sealed class VersionInformationCodeGenerator : ISourceGenerator
 
         using (source.StartBlock("internal static class VersionInformation"))
         {
-            source.AppendLine($"public const string FileVersion = \"{version}\";");
-            source.AppendLine($"public const string Product = \"{product}\";");
+            source.AppendLine($"public const string FileVersion = \"{version}\";")
+                  .AppendLine($"public const string Product = \"{product}\";");
         }
 
         return source;
@@ -48,12 +48,9 @@ public sealed class VersionInformationCodeGenerator : ISourceGenerator
 
     private static string GetAssemblyProduct(in GeneratorExecutionContext context, string assemblyNamespace)
     {
-        if (!context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(key: "build_property.rootnamespace", out string? product))
-        {
-            product = assemblyNamespace;
-        }
-
-        return product;
+        return !context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(key: "build_property.rootnamespace", out string? product)
+            ? assemblyNamespace
+            : product;
     }
 
     private static string GetAssemblyVersion(in GeneratorExecutionContext context)
