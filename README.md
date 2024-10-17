@@ -30,7 +30,6 @@ internal static class VersionInformation
 Controlled by the following properties:
 
 ```xml
-
 <PropertyGroup>
     <Company>Example Company</Company>
     <Copyright>Copyright © Example Company 2024</Copyright>
