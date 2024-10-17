@@ -40,6 +40,7 @@ public sealed class VersionInformationCodeGenerator : ISourceGenerator
               .AppendBlankLine()
               .AppendLine($"namespace {assemblyNamespace};")
               .AppendBlankLine()
+              .AppendGeneratedCodeAttribute()
               .AppendLine($"[GeneratedCode(tool: \"{RuntimeVersionInformation.ToolName}\", version: \"{RuntimeVersionInformation.GeneratorVersion}\")]");
 
         using (source.StartBlock("internal static class VersionInformation"))
