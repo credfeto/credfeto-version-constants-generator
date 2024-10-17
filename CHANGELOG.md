@@ -8,6 +8,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ## [Unreleased]
 ### Added
 ### Fixed
+- Skipped duplicate attributes
 ### Changed
 - SDK - Updated DotNet SDK to 9.0.100-rc.2.24474.11
 ### Removed

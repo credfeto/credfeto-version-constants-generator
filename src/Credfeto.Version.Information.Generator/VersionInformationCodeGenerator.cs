@@ -84,6 +84,12 @@ public sealed class VersionInformationCodeGenerator : ISourceGenerator
             }
 
             string key = a.AttributeClass.Name;
+
+            if (attributes.ContainsKey(key))
+            {
+                continue;
+            }
+
             object? v = a.ConstructorArguments[0].Value;
             string value = v?.ToString() ?? string.Empty;
 
