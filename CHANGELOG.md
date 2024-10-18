@@ -11,6 +11,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Changed
 - Dependencies - Updated Meziantou.Analyzer to 2.0.172
 - Dependencies - Updated Credfeto.Enumeration to 1.1.14.596
+- Switched to use Incemental source generation
 ### Removed
 ### Deployment Changes
 
