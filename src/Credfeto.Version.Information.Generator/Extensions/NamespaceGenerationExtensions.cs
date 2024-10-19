@@ -16,29 +16,21 @@ internal static class NamespaceGenerationExtensions
 
     private static string? GetRootNameSpace(AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
     {
-        if (analyzerConfigOptionsProvider.GlobalOptions.TryGetValue(key: "build_property.rootnamespace", out string? ns) && !string.IsNullOrWhiteSpace(ns))
-        {
-            return ns;
-        }
-
-        return null;
+        return analyzerConfigOptionsProvider.GlobalOptions.TryGetValue(key: "build_property.rootnamespace", out string? ns) && !string.IsNullOrWhiteSpace(ns)
+            ? ns
+            : null;
     }
 
     private static string GetAssemblyProduct(in this NamespaceGeneration namespaceGeneration, in AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
     {
-        string? product = GetRootNameSpace(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider);
+        return GetRootNameSpace(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider) ?? GetAssemblyTitle(namespaceGeneration) ?? namespaceGeneration.Namespace;
+    }
 
-        if (product is not null)
-        {
-            return product;
-        }
-
-        if (namespaceGeneration.Attributes.TryGetValue(nameof(AssemblyTitleAttribute), value: out product) && !string.IsNullOrWhiteSpace(product))
-        {
-            return product;
-        }
-
-        return namespaceGeneration.Namespace;
+    private static string? GetAssemblyTitle(in NamespaceGeneration namespaceGeneration)
+    {
+        return namespaceGeneration.Attributes.TryGetValue(nameof(AssemblyTitleAttribute), out string? product) && !string.IsNullOrWhiteSpace(product)
+            ? product
+            : null;
     }
 
     private static string GetAssemblyVersion(in this NamespaceGeneration namespaceGeneration)
@@ -52,19 +44,18 @@ internal static class NamespaceGenerationExtensions
     {
         ns = namespaceGeneration.GetNamespace(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider);
         string product = namespaceGeneration.GetAssemblyProduct(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider);
-        string version = CleanVersion(namespaceGeneration.GetAssemblyVersion());
+        string version = RemoveGitHashFromVersion(namespaceGeneration.GetAssemblyVersion());
 
         CodeBuilder source = new();
 
-        source.AppendFileHeader()
-              .AppendLine("using System;")
-              .AppendLine("using System.CodeDom.Compiler;")
-              .AppendBlankLine()
-              .AppendLine($"namespace {ns};")
-              .AppendBlankLine()
-              .AppendGeneratedCodeAttribute();
-
-        using (source.StartBlock("internal static class VersionInformation"))
+        using (source.AppendFileHeader()
+                     .AppendLine("using System;")
+                     .AppendLine("using System.CodeDom.Compiler;")
+                     .AppendBlankLine()
+                     .AppendLine($"namespace {ns};")
+                     .AppendBlankLine()
+                     .AppendGeneratedCodeAttribute()
+                     .StartBlock("internal static class VersionInformation"))
         {
             DumpAttributes(attributes: namespaceGeneration.Attributes, source: source);
 
@@ -82,16 +73,13 @@ internal static class NamespaceGenerationExtensions
     {
         foreach (string key in attributes.Keys)
         {
-            if (!attributes.TryGetValue(key: key, out string? value))
-            {
-                continue;
-            }
+            string value = attributes[key];
 
             source.AppendLine($"// {key} = {value}");
         }
     }
 
-    private static string CleanVersion(string source)
+    private static string RemoveGitHashFromVersion(string source)
     {
         int pos = source.IndexOf(value: '+');
 

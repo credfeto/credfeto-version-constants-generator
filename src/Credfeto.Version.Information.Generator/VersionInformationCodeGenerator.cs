@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using Credfeto.Version.Information.Generator.Builders;
 using Credfeto.Version.Information.Generator.Extensions;
@@ -17,77 +18,95 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 {
     private const string CLASS_NAME = "VersionInformation";
 
+    private static readonly (NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) IgnoreResult = (namespaceInfo: null, errorInfo: null);
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        HashSet<string> generated = new(StringComparer.Ordinal);
+        context.RegisterSourceOutput(ExtractNamespaces(context), action: GenerateVersionInformation);
+    }
 
-        IncrementalValuesProvider<(NamespaceGeneration? classInfo, ErrorInfo? errorInfo)> namespaces =
-            context.SyntaxProvider.CreateSyntaxProvider(predicate: static (n, _) => n is NamespaceDeclarationSyntax or FileScopedNamespaceDeclarationSyntax, transform: (sc, ct) => GetNamespace(sc, generated, ct ));
+    private static IncrementalValuesProvider<((NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) Left, AnalyzerConfigOptionsProvider Right)> ExtractNamespaces(
+        in IncrementalGeneratorInitializationContext context)
+    {
+        HashSet<string> assembliesToGenerateVersionInformation = new(StringComparer.Ordinal);
 
-        IncrementalValuesProvider<((NamespaceGeneration? classInfo, ErrorInfo? errorInfo) Left, AnalyzerConfigOptionsProvider Right)> withOptions =
+        IncrementalValuesProvider<(NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo)> namespaces = context.SyntaxProvider.CreateSyntaxProvider(
+            predicate: static (n, _) => n is NamespaceDeclarationSyntax or FileScopedNamespaceDeclarationSyntax,
+            transform: (sc, ct) => GetNamespace(generatorSyntaxContext: sc, generated: assembliesToGenerateVersionInformation, cancellationToken: ct));
+
+        IncrementalValuesProvider<((NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) Left, AnalyzerConfigOptionsProvider Right)> withOptions =
             namespaces.Combine(context.AnalyzerConfigOptionsProvider);
 
-
-        context.RegisterSourceOutput(source: withOptions, action: GenerateVersionInformation);
+        return withOptions;
     }
 
-    private static (NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) GetNamespace(in GeneratorSyntaxContext generatorSyntaxContext, HashSet<string> generated, CancellationToken cancellationToken)
+    private static (NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) GetNamespace(in GeneratorSyntaxContext generatorSyntaxContext,
+                                                                                           HashSet<string> generated,
+                                                                                           CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
-        if (generatorSyntaxContext.Node is not NamespaceDeclarationSyntax and not FileScopedNamespaceDeclarationSyntax)
+        try
         {
-            return (null, InvalidInfo(generatorSyntaxContext));
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (generatorSyntaxContext.Node is not NamespaceDeclarationSyntax and not FileScopedNamespaceDeclarationSyntax)
+            {
+                return IgnoreResult;
+            }
+
+            Compilation compilation = generatorSyntaxContext.SemanticModel.Compilation;
+
+            AssemblyIdentity assembly = GetAssembly(compilation);
+
+            if (!generated.Add(assembly.Name))
+            {
+                return IgnoreResult;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ImmutableDictionary<string, string> attributes = ExtractAttributes(compilation.Assembly);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return (new NamespaceGeneration(assembly: assembly, attributes: attributes), null);
         }
-
-        Compilation compilation = generatorSyntaxContext.SemanticModel.Compilation;
-
-        AssemblyIdentity assembly = GetAssembly(compilation);
-
-        if(!generated.Add(assembly.Name))
+        catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            return (null, null);
+            return UnhandledException(generatorSyntaxContext: generatorSyntaxContext, exception: exception);
         }
-
-        cancellationToken.ThrowIfCancellationRequested();
-
-        ImmutableDictionary<string, string> attributes = ExtractAttributes(compilation.Assembly);
-        cancellationToken.ThrowIfCancellationRequested();
-
-        return (new NamespaceGeneration(assembly: assembly, attributes: attributes), null);
     }
 
-    private static ImmutableDictionary<string, string> ExtractAttributes(in IAssemblySymbol ass)
+    private static (NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) UnhandledException(in GeneratorSyntaxContext generatorSyntaxContext, Exception exception)
     {
-        ImmutableArray<AttributeData> attibuteData = ass.GetAttributes();
+        return (namespaceInfo: null, errorInfo: new ErrorInfo(generatorSyntaxContext.Node.GetLocation(), exception: exception));
+    }
 
+    private static ImmutableDictionary<string, string> ExtractAttributes(in IAssemblySymbol assemblySymbol)
+    {
         ImmutableDictionary<string, string> attributes = ImmutableDictionary<string, string>.Empty;
 
-        foreach (AttributeData a in attibuteData)
+        // ! Already filtered out the attributes that are not needed
+        foreach ((string key, string value) in assemblySymbol.GetAttributes()
+                                                             .Select(ExtractAttributes)
+                                                             .Where(a => a.HasValue)
+                                                             .Select(a => a!.Value)
+                                                             .Where(item => !attributes.ContainsKey(item.key)))
         {
-            if (a.AttributeClass is null || a.ConstructorArguments.Length != 1)
-            {
-                continue;
-            }
-
-            string key = a.AttributeClass.Name;
-
-            if (attributes.ContainsKey(key))
-            {
-                continue;
-            }
-
-            object? v = a.ConstructorArguments[0].Value;
-            string value = v?.ToString() ?? string.Empty;
-
             attributes = attributes.Add(key: key, value: value);
         }
 
         return attributes;
     }
 
-    private static ErrorInfo InvalidInfo(in GeneratorSyntaxContext generatorSyntaxContext)
+    private static (string key, string value)? ExtractAttributes(AttributeData a)
     {
-        return new(generatorSyntaxContext.Node.GetLocation(), new InvalidOperationException("Expected a namespace declaration"));
+        if (a.AttributeClass is null || a.ConstructorArguments.Length != 1)
+        {
+            return null;
+        }
+
+        object? v = a.ConstructorArguments[0].Value;
+
+        return (key: a.AttributeClass.Name, value: v?.ToString() ?? string.Empty);
     }
 
     private static AssemblyIdentity GetAssembly(Compilation compilation)
@@ -102,7 +121,7 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 
     private static DiagnosticDescriptor CreateUnhandledExceptionDiagnostic(Exception exception)
     {
-        return new(id: "VER002",
+        return new(id: "VER001",
                    title: "Unhandled Exception",
                    exception.Message + ' ' + exception.StackTrace,
                    category: RuntimeVersionInformation.ToolName,
