@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics;
 using Microsoft.CodeAnalysis;
 
-namespace Credfeto.Version.Information.Generator;
+namespace Credfeto.Version.Information.Generator.Models;
 
 [DebuggerDisplay("{Location} {Exception}")]
 public readonly record struct ErrorInfo
