@@ -9,17 +9,20 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
-- Dependencies - Updated Credfeto.Enumeration to 1.1.14.596
-- Switched to use Incemental source generation
-- Dependencies - Updated FunFair.CodeAnalysis to 7.0.24.635
-- Dependencies - Updated FunFair.Test.Common to 6.1.229.911
-- Dependencies - Updated Meziantou.Analyzer to 2.0.175
 ### Removed
 ### Deployment Changes
 
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+## [1.0.3] - 2024-10-24
+### Changed
+- Dependencies - Updated Credfeto.Enumeration to 1.1.14.596
+- Switched to use Incemental source generation
+- Dependencies - Updated FunFair.CodeAnalysis to 7.0.24.635
+- Dependencies - Updated FunFair.Test.Common to 6.1.229.911
+- Dependencies - Updated Meziantou.Analyzer to 2.0.175
+
 ## [1.0.2] - 2024-10-17
 ### Fixed
 - Skipped duplicate attributes
