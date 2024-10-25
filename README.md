@@ -1,4 +1,4 @@
-# credfeto-versioninfo
+# credfeto-version-constants-generator
 
 Source generator for embedding build information as compile time constants in C# projects.
 

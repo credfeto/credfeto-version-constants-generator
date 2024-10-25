@@ -38,11 +38,11 @@
     <OptimizationPreference>speed</OptimizationPreference>
     <OutputType>Library</OutputType>
     <PackAsTool>false</PackAsTool>
-    <PackageLicense>https://raw.githubusercontent.com/credfeto/credfeto-credfeto-versioninfo/main/LICENSE</PackageLicense>
+    <PackageLicense>https://raw.githubusercontent.com/credfeto/credfeto-version-constants-generator/main/LICENSE</PackageLicense>
     <PackageReleaseNotes>$(ReleaseNotes)</PackageReleaseNotes>
     <PackageTags>C# Source code generator version information</PackageTags>
     <Product>Source Generation</Product>
-    <RepositoryUrl>https://github.com/credfeto/credfeto-versioninfo</RepositoryUrl>
+    <RepositoryUrl>https://github.com/credfeto/credfeto-version-constants-generator</RepositoryUrl>
     <RunAOTCompilation>false</RunAOTCompilation>
     <SymbolPackageFormat>symbols.nupkg</SymbolPackageFormat>
     <TargetFramework>netstandard2.0</TargetFramework>
