@@ -9,14 +9,17 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
-- Dependencies - Updated Meziantou.Analyzer to 2.0.176
-- Dependencies - Updated Credfeto.Enumeration to 1.1.15.626
 ### Removed
 ### Deployment Changes
 
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+## [1.0.4] - 2024-10-25
+### Changed
+- Dependencies - Updated Meziantou.Analyzer to 2.0.176
+- Dependencies - Updated Credfeto.Enumeration to 1.1.15.626
+
 ## [1.0.3] - 2024-10-24
 ### Changed
 - Dependencies - Updated Credfeto.Enumeration to 1.1.14.596
