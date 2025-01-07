@@ -10,6 +10,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Fixed
 ### Changed
 - Dependencies - Updated Credfeto.Enumeration to 1.2.50.814
+- Dependencies - Updated Microsoft.Sbom.Targets to 3.0.1
 ### Removed
 ### Deployment Changes
 
