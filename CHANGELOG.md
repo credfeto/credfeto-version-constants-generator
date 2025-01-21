@@ -9,13 +9,16 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
-- Dependencies - Updated Credfeto.Enumeration to 1.2.55.854
 ### Removed
 ### Deployment Changes
 
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+## [1.0.44] - 2025-01-21
+### Changed
+- Dependencies - Updated Credfeto.Enumeration to 1.2.55.854
+
 ## [1.0.43] - 2025-01-20
 ### Changed
 - Dependencies - Updated xunit.analyzers to 1.19.0
