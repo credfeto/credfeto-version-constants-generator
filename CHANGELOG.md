@@ -10,6 +10,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Fixed
 ### Changed
 - Dependencies - Updated FunFair.CodeAnalysis to 7.0.65.898
+- Dependencies - Updated Credfeto.Enumeration to 1.2.65.902
 ### Removed
 ### Deployment Changes
 
