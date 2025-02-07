@@ -13,6 +13,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Dependencies - Updated Microsoft.Sbom.Targets to 3.1.0
 - Dependencies - Updated FunFair.Test.Common to 6.1.256.1131
 - Dependencies - Updated xunit.analyzers to 1.20.0
+- Dependencies - Updated xunit.runner.visualstudio to 3.0.2
 ### Removed
 ### Deployment Changes
 
