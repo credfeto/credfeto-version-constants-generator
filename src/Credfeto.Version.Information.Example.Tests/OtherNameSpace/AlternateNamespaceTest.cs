@@ -7,9 +7,7 @@ namespace Credfeto.Version.Information.Example.Tests.OtherNameSpace;
 public sealed class AlternateNamespaceTest : LoggingTestBase
 {
     public AlternateNamespaceTest(ITestOutputHelper output)
-        : base(output)
-    {
-    }
+        : base(output) { }
 
     [Fact]
     public void Version()
