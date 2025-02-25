@@ -11,6 +11,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Changed
 - Dependencies - Updated Roslynator.Analyzers to 4.13.1
 - Dependencies - Updated Microsoft.CodeAnalysis.CSharp to 4.13.0
+- Dependencies - Updated FunFair.Test.Common to 6.1.260.1166
 ### Removed
 ### Deployment Changes
 
