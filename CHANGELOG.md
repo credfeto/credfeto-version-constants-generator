@@ -10,6 +10,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Fixed
 ### Changed
 - Dependencies - Updated Roslynator.Analyzers to 4.13.1
+- Dependencies - Updated Microsoft.CodeAnalysis.CSharp to 4.13.0
 ### Removed
 ### Deployment Changes
 
