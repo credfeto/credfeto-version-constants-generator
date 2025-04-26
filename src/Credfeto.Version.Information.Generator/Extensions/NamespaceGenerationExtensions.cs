@@ -18,15 +18,11 @@ internal static class NamespaceGenerationExtensions
             ?? namespaceGeneration.Namespace;
     }
 
-    private static string? GetRootNameSpace(
-        AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider
-    )
+    private static string? GetRootNameSpace(AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
     {
         return
-            analyzerConfigOptionsProvider.GlobalOptions.TryGetValue(
-                key: "build_property.rootnamespace",
-                out string? ns
-            ) && !string.IsNullOrWhiteSpace(ns)
+            analyzerConfigOptionsProvider.GlobalOptions.TryGetValue(key: "build_property.rootnamespace", out string? ns)
+            && !string.IsNullOrWhiteSpace(ns)
             ? ns
             : null;
     }
@@ -44,10 +40,8 @@ internal static class NamespaceGenerationExtensions
     private static string? GetAssemblyTitle(in NamespaceGeneration namespaceGeneration)
     {
         return
-            namespaceGeneration.Attributes.TryGetValue(
-                nameof(AssemblyTitleAttribute),
-                out string? product
-            ) && !string.IsNullOrWhiteSpace(product)
+            namespaceGeneration.Attributes.TryGetValue(nameof(AssemblyTitleAttribute), out string? product)
+            && !string.IsNullOrWhiteSpace(product)
             ? product
             : null;
     }
@@ -69,9 +63,7 @@ internal static class NamespaceGenerationExtensions
         out string ns
     )
     {
-        ns = namespaceGeneration.GetNamespace(
-            analyzerConfigOptionsProvider: analyzerConfigOptionsProvider
-        );
+        ns = namespaceGeneration.GetNamespace(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider);
         string product = namespaceGeneration.GetAssemblyProduct(
             analyzerConfigOptionsProvider: analyzerConfigOptionsProvider
         );
@@ -112,10 +104,7 @@ internal static class NamespaceGenerationExtensions
     }
 
     [Conditional("DEBUG")]
-    private static void DumpAttributes(
-        ImmutableDictionary<string, string> attributes,
-        CodeBuilder source
-    )
+    private static void DumpAttributes(ImmutableDictionary<string, string> attributes, CodeBuilder source)
     {
         foreach (string key in attributes.Keys)
         {
