@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -18,17 +18,14 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 {
     private const string CLASS_NAME = "VersionInformation";
 
-    private static readonly (
-        NamespaceGeneration? namespaceInfo,
-        ErrorInfo? errorInfo
-    ) IgnoreResult = (namespaceInfo: null, errorInfo: null);
+    private static readonly (NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) IgnoreResult = (
+        namespaceInfo: null,
+        errorInfo: null
+    );
 
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        context.RegisterSourceOutput(
-            ExtractNamespaces(context),
-            action: GenerateVersionInformation
-        );
+        context.RegisterSourceOutput(ExtractNamespaces(context), action: GenerateVersionInformation);
     }
 
     private static IncrementalValuesProvider<(
@@ -38,19 +35,16 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
     {
         HashSet<string> assembliesToGenerateVersionInformation = new(StringComparer.Ordinal);
 
-        IncrementalValuesProvider<(
-            NamespaceGeneration? namespaceInfo,
-            ErrorInfo? errorInfo
-        )> namespaces = context.SyntaxProvider.CreateSyntaxProvider(
-            predicate: static (n, _) =>
-                n is NamespaceDeclarationSyntax or FileScopedNamespaceDeclarationSyntax,
-            transform: (sc, ct) =>
-                GetNamespace(
-                    generatorSyntaxContext: sc,
-                    generated: assembliesToGenerateVersionInformation,
-                    cancellationToken: ct
-                )
-        );
+        IncrementalValuesProvider<(NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo)> namespaces =
+            context.SyntaxProvider.CreateSyntaxProvider(
+                predicate: static (n, _) => n is NamespaceDeclarationSyntax or FileScopedNamespaceDeclarationSyntax,
+                transform: (sc, ct) =>
+                    GetNamespace(
+                        generatorSyntaxContext: sc,
+                        generated: assembliesToGenerateVersionInformation,
+                        cancellationToken: ct
+                    )
+            );
 
         IncrementalValuesProvider<(
             (NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) Left,
@@ -90,19 +84,14 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            ImmutableDictionary<string, string> attributes = ExtractAttributes(
-                compilation.Assembly
-            );
+            ImmutableDictionary<string, string> attributes = ExtractAttributes(compilation.Assembly);
             cancellationToken.ThrowIfCancellationRequested();
 
             return (new NamespaceGeneration(assembly: assembly, attributes: attributes), null);
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            return UnhandledException(
-                generatorSyntaxContext: generatorSyntaxContext,
-                exception: exception
-            );
+            return UnhandledException(generatorSyntaxContext: generatorSyntaxContext, exception: exception);
         }
     }
 
@@ -113,16 +102,11 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
     {
         return (
             namespaceInfo: null,
-            errorInfo: new ErrorInfo(
-                generatorSyntaxContext.Node.GetLocation(),
-                exception: exception
-            )
+            errorInfo: new ErrorInfo(generatorSyntaxContext.Node.GetLocation(), exception: exception)
         );
     }
 
-    private static ImmutableDictionary<string, string> ExtractAttributes(
-        in IAssemblySymbol assemblySymbol
-    )
+    private static ImmutableDictionary<string, string> ExtractAttributes(in IAssemblySymbol assemblySymbol)
     {
         ImmutableDictionary<string, string> attributes = ImmutableDictionary<string, string>.Empty;
 
@@ -159,17 +143,10 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
         return compilation.Assembly.Identity;
     }
 
-    private static void ReportException(
-        Location location,
-        in SourceProductionContext context,
-        Exception exception
-    )
+    private static void ReportException(Location location, in SourceProductionContext context, Exception exception)
     {
         context.ReportDiagnostic(
-            diagnostic: Diagnostic.Create(
-                CreateUnhandledExceptionDiagnostic(exception),
-                location: location
-            )
+            diagnostic: Diagnostic.Create(CreateUnhandledExceptionDiagnostic(exception), location: location)
         );
     }
 
@@ -187,20 +164,13 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 
     private static void GenerateVersionInformation(
         SourceProductionContext sourceProductionContext,
-        (
-            (NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) Left,
-            AnalyzerConfigOptionsProvider Right
-        ) item
+        ((NamespaceGeneration? namespaceInfo, ErrorInfo? errorInfo) Left, AnalyzerConfigOptionsProvider Right) item
     )
     {
         if (item.Left.errorInfo is not null)
         {
             ErrorInfo ei = item.Left.errorInfo.Value;
-            ReportException(
-                location: ei.Location,
-                context: sourceProductionContext,
-                exception: ei.Exception
-            );
+            ReportException(location: ei.Location, context: sourceProductionContext, exception: ei.Exception);
 
             return;
         }
@@ -228,9 +198,6 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
             out string ns
         );
 
-        sourceProductionContext.AddSource(
-            $"{ns}.{CLASS_NAME}.generated.cs",
-            sourceText: source.Text
-        );
+        sourceProductionContext.AddSource($"{ns}.{CLASS_NAME}.generated.cs", sourceText: source.Text);
     }
 }
