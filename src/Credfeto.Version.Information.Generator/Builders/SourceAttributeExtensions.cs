@@ -19,11 +19,7 @@ internal static class SourceAttributeExtensions
         return source;
     }
 
-    public static CodeBuilder AppendPublicConstant(
-        this CodeBuilder source,
-        string key,
-        string value
-    )
+    public static CodeBuilder AppendPublicConstant(this CodeBuilder source, string key, string value)
     {
         return source.AppendLine($"public const string {key} = \"{value}\";");
     }
