@@ -7,10 +7,7 @@ namespace Credfeto.Version.Information.Generator.Models;
 [DebuggerDisplay("{Namespace}")]
 public readonly record struct NamespaceGeneration
 {
-    public NamespaceGeneration(
-        AssemblyIdentity assembly,
-        ImmutableDictionary<string, string> attributes
-    )
+    public NamespaceGeneration(AssemblyIdentity assembly, ImmutableDictionary<string, string> attributes)
     {
         this.Assembly = assembly;
         this.Attributes = attributes;
