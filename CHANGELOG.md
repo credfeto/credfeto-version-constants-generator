@@ -9,15 +9,18 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
-- Dependencies - Updated Credfeto.Enumeration to 1.2.83.1123
-- Dependencies - Updated Microsoft.CodeAnalysis.Analyzers to 4.14.0
-- Dependencies - Updated Microsoft.CodeAnalysis.CSharp to 4.14.0
 ### Removed
 ### Deployment Changes
 
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+## [1.0.71] - 2025-05-16
+### Changed
+- Dependencies - Updated Credfeto.Enumeration to 1.2.83.1123
+- Dependencies - Updated Microsoft.CodeAnalysis.Analyzers to 4.14.0
+- Dependencies - Updated Microsoft.CodeAnalysis.CSharp to 4.14.0
+
 ## [1.0.70] - 2025-05-14
 ### Changed
 - Dependencies - Updated Nullable.Extended.Analyzer to 1.15.6581
