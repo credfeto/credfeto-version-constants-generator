@@ -9,18 +9,21 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
-- Dependencies - Updated Meziantou.Analyzer to 2.0.212
-- SDK - Updated DotNet SDK to 9.0.304
-- Dependencies - Updated FunFair.Test.Common to 6.1.282.1603
-- Dependencies - Updated Credfeto.Enumeration to 1.2.125.1355
-- Dependencies - Updated FunFair.CodeAnalysis to 7.1.18.1350
-- Dependencies - Updated Philips.CodeAnalysis.MaintainabilityAnalyzers to 1.7.0
 ### Removed
 ### Deployment Changes
 
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+## [1.0.111] - 2025-08-10
+### Changed
+- Dependencies - Updated Meziantou.Analyzer to 2.0.212
+- SDK - Updated DotNet SDK to 9.0.304
+- Dependencies - Updated FunFair.Test.Common to 6.1.282.1603
+- Dependencies - Updated Credfeto.Enumeration to 1.2.125.1355
+- Dependencies - Updated FunFair.CodeAnalysis to 7.1.18.1350
+- Dependencies - Updated Philips.CodeAnalysis.MaintainabilityAnalyzers to 1.7.0
+
 ## [1.0.110] - 2025-08-08
 ### Changed
 - Dependencies - Updated FunFair.Test.Common to 6.1.281.1593
