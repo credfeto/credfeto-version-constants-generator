@@ -11,12 +11,9 @@ internal static class SourceAttributeExtensions
         string key
     )
     {
-        if (attributes.TryGetValue(key: attributeName, out string? value))
-        {
-            return source.AppendPublicConstant(key: key, value: value);
-        }
-
-        return source;
+        return attributes.TryGetValue(key: attributeName, out string? value)
+            ? source.AppendPublicConstant(key: key, value: value)
+            : source;
     }
 
     public static CodeBuilder AppendPublicConstant(this CodeBuilder source, string key, string value)
