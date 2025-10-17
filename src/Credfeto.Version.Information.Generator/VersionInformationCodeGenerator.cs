@@ -77,19 +77,20 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 
     private static ImmutableDictionary<string, string> ExtractAttributes(in IAssemblySymbol assemblySymbol)
     {
-        ImmutableDictionary<string, string> attributes = ImmutableDictionary<string, string>.Empty;
-
         // ! Already filtered out the attributes that are not needed
-        foreach ((string key, string value) in assemblySymbol.GetAttributes()
-                                                             .Select(ExtractAttributes)
-                                                             .Where(a => a.HasValue)
-                                                             .Select(a => a!.Value)
-                                                             .Where(item => !attributes.ContainsKey(item.key)))
-        {
-            attributes = attributes.Add(key: key, value: value);
-        }
+        return assemblySymbol.GetAttributes()
+                             .Select(ExtractAttributes)
+                             .Where(a => a.HasValue)
+                             .Select(a => a!.Value)
+                             .Aggregate(seed: ImmutableDictionary<string, string>.Empty,
+                                        func: Include);
+    }
 
-        return attributes;
+    private static ImmutableDictionary<string, string> Include(ImmutableDictionary<string, string> result, (string key, string value) element)
+    {
+        return result.ContainsKey(element.key)
+            ? result
+            : result.Add(key: element.key, value: element.value);
     }
 
     private static (string key, string value)? ExtractAttributes(AttributeData a)
