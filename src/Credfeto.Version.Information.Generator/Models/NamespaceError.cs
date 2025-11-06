@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Credfeto.Version.Information.Generator.Models;
 
 [DebuggerDisplay("{NamespaceInfo} {ErrorInfo}")]
+[StructLayout(LayoutKind.Auto)]
 internal readonly record struct NamespaceError
 {
     public NamespaceError()
