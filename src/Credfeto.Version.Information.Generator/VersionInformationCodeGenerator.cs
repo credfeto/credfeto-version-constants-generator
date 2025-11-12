@@ -25,25 +25,42 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(ExtractNamespaces(context), action: GenerateVersionInformation);
     }
 
-    private static IncrementalValuesProvider<( NamespaceError Left, AnalyzerConfigOptionsProvider Right )> ExtractNamespaces(in IncrementalGeneratorInitializationContext context)
+    private static IncrementalValuesProvider<(
+        NamespaceError Left,
+        AnalyzerConfigOptionsProvider Right
+    )> ExtractNamespaces(in IncrementalGeneratorInitializationContext context)
     {
         HashSet<string> assembliesToGenerateVersionInformation = new(StringComparer.Ordinal);
 
-        return context.SyntaxProvider.CreateSyntaxProvider(predicate: static (syntaxNode, _) => syntaxNode is NamespaceDeclarationSyntax or FileScopedNamespaceDeclarationSyntax,
-                                                           transform: (generatorSyntaxContext, cancellationToken) =>
-                                                                          GetNamespace(generatorSyntaxContext: generatorSyntaxContext,
-                                                                                       generated: assembliesToGenerateVersionInformation,
-                                                                                       cancellationToken: cancellationToken))
-                      .Combine(context.AnalyzerConfigOptionsProvider);
+        return context
+            .SyntaxProvider.CreateSyntaxProvider(
+                predicate: static (syntaxNode, _) =>
+                    syntaxNode is NamespaceDeclarationSyntax or FileScopedNamespaceDeclarationSyntax,
+                transform: (generatorSyntaxContext, cancellationToken) =>
+                    GetNamespace(
+                        generatorSyntaxContext: generatorSyntaxContext,
+                        generated: assembliesToGenerateVersionInformation,
+                        cancellationToken: cancellationToken
+                    )
+            )
+            .Combine(context.AnalyzerConfigOptionsProvider);
     }
 
-    private static NamespaceError GetNamespace(in GeneratorSyntaxContext generatorSyntaxContext, HashSet<string> generated, CancellationToken cancellationToken)
+    private static NamespaceError GetNamespace(
+        in GeneratorSyntaxContext generatorSyntaxContext,
+        HashSet<string> generated,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (generatorSyntaxContext.Node is not NamespaceDeclarationSyntax and not FileScopedNamespaceDeclarationSyntax)
+            if (
+                generatorSyntaxContext.Node
+                is not NamespaceDeclarationSyntax
+                    and not FileScopedNamespaceDeclarationSyntax
+            )
             {
                 return IgnoreResult;
             }
@@ -70,7 +87,10 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
         }
     }
 
-    private static NamespaceError UnhandledException(in GeneratorSyntaxContext generatorSyntaxContext, Exception exception)
+    private static NamespaceError UnhandledException(
+        in GeneratorSyntaxContext generatorSyntaxContext,
+        Exception exception
+    )
     {
         return new(new ErrorInfo(generatorSyntaxContext.Node.GetLocation(), exception: exception));
     }
@@ -78,19 +98,20 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
     private static ImmutableDictionary<string, string> ExtractAttributes(in IAssemblySymbol assemblySymbol)
     {
         // ! Already filtered out the attributes that are not needed
-        return assemblySymbol.GetAttributes()
-                             .Select(ExtractAttributes)
-                             .Where(a => a.HasValue)
-                             .Select(a => a!.Value)
-                             .Aggregate(seed: ImmutableDictionary<string, string>.Empty,
-                                        func: Include);
+        return assemblySymbol
+            .GetAttributes()
+            .Select(ExtractAttributes)
+            .Where(a => a.HasValue)
+            .Select(a => a!.Value)
+            .Aggregate(seed: ImmutableDictionary<string, string>.Empty, func: Include);
     }
 
-    private static ImmutableDictionary<string, string> Include(ImmutableDictionary<string, string> result, (string key, string value) element)
+    private static ImmutableDictionary<string, string> Include(
+        ImmutableDictionary<string, string> result,
+        (string key, string value) element
+    )
     {
-        return result.ContainsKey(element.key)
-            ? result
-            : result.Add(key: element.key, value: element.value);
+        return result.ContainsKey(element.key) ? result : result.Add(key: element.key, value: element.value);
     }
 
     private static (string key, string value)? ExtractAttributes(AttributeData a)
@@ -112,20 +133,27 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 
     private static void ReportException(Location location, in SourceProductionContext context, Exception exception)
     {
-        context.ReportDiagnostic(diagnostic: Diagnostic.Create(CreateUnhandledExceptionDiagnostic(exception), location: location));
+        context.ReportDiagnostic(
+            diagnostic: Diagnostic.Create(CreateUnhandledExceptionDiagnostic(exception), location: location)
+        );
     }
 
     private static DiagnosticDescriptor CreateUnhandledExceptionDiagnostic(Exception exception)
     {
-        return new(id: "VER001",
-                   title: "Unhandled Exception",
-                   exception.Message + ' ' + exception.StackTrace,
-                   category: RuntimeVersionInformation.ToolName,
-                   defaultSeverity: DiagnosticSeverity.Error,
-                   isEnabledByDefault: true);
+        return new(
+            id: "VER001",
+            title: "Unhandled Exception",
+            exception.Message + ' ' + exception.StackTrace,
+            category: RuntimeVersionInformation.ToolName,
+            defaultSeverity: DiagnosticSeverity.Error,
+            isEnabledByDefault: true
+        );
     }
 
-    private static void GenerateVersionInformation(SourceProductionContext sourceProductionContext, (NamespaceError Left, AnalyzerConfigOptionsProvider Right) item)
+    private static void GenerateVersionInformation(
+        SourceProductionContext sourceProductionContext,
+        (NamespaceError Left, AnalyzerConfigOptionsProvider Right) item
+    )
     {
         if (item.Left.ErrorInfo is not null)
         {
@@ -140,14 +168,23 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
             return;
         }
 
-        GenerateVersionInformation(sourceProductionContext: sourceProductionContext, namespaceInfo: item.Left.NamespaceInfo.Value, analyzerConfigOptionsProvider: item.Right);
+        GenerateVersionInformation(
+            sourceProductionContext: sourceProductionContext,
+            namespaceInfo: item.Left.NamespaceInfo.Value,
+            analyzerConfigOptionsProvider: item.Right
+        );
     }
 
-    private static void GenerateVersionInformation(in SourceProductionContext sourceProductionContext,
-                                                   in NamespaceGeneration namespaceInfo,
-                                                   AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
+    private static void GenerateVersionInformation(
+        in SourceProductionContext sourceProductionContext,
+        in NamespaceGeneration namespaceInfo,
+        AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider
+    )
     {
-        CodeBuilder source = namespaceInfo.BuildSource(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider, out string ns);
+        CodeBuilder source = namespaceInfo.BuildSource(
+            analyzerConfigOptionsProvider: analyzerConfigOptionsProvider,
+            out string ns
+        );
 
         sourceProductionContext.AddSource($"{ns}.{CLASS_NAME}.generated.cs", sourceText: source.Text);
     }
