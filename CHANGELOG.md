@@ -9,6 +9,14 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
+### Removed
+### Deployment Changes
+
+<!--
+Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
+-->
+## [1.0.117] - 2025-11-19
+### Changed
 - Dependencies - Updated Credfeto.Enumeration to 1.2.131.1523
 - Dependencies - Updated FunFair.CodeAnalysis to 7.1.26.1607
 - Dependencies - Updated Meziantou.Analyzer to 2.0.253
@@ -16,12 +24,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Dependencies - Updated Philips.CodeAnalysis.MaintainabilityAnalyzers to 1.9.1
 - Dependencies - Updated Roslynator.Analyzers to 4.14.1
 - Dependencies - Updated FunFair.Test.Common to 6.2.5.1856
-### Removed
-### Deployment Changes
 
-<!--
-Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
--->
 ## [1.0.116] - 2025-11-13
 ### Changed
 - Dotnet 10
