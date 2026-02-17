@@ -11,6 +11,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Changed
 - Dependencies - Updated AsyncFixer to 2.1.0
 - Dependencies - Updated Credfeto.Enumeration to 1.2.135.1701
+- Dependencies - Updated FunFair.CodeAnalysis to 7.1.32.1699
 ### Removed
 ### Deployment Changes
 
