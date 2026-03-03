@@ -9,16 +9,19 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
-- Dependencies - Updated Credfeto.Enumeration to 1.2.137.1722
-- Dependencies - Updated FunFair.CodeAnalysis to 7.1.33.1711
-- Dependencies - Updated FunFair.Test.Common to 6.2.17.1982
-- Dependencies - Updated FunFair.Test.Source.Generator to 6.2.17.1982
 ### Removed
 ### Deployment Changes
 
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+## [1.0.121] - 2026-03-03
+### Changed
+- Dependencies - Updated Credfeto.Enumeration to 1.2.137.1722
+- Dependencies - Updated FunFair.CodeAnalysis to 7.1.33.1711
+- Dependencies - Updated FunFair.Test.Common to 6.2.17.1982
+- Dependencies - Updated FunFair.Test.Source.Generator to 6.2.17.1982
+
 ## [1.0.120] - 2026-02-22
 ### Changed
 - Dependencies - Updated AsyncFixer to 2.1.0
