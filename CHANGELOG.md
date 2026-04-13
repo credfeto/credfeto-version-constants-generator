@@ -13,6 +13,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Dependencies - Updated Microsoft.CodeAnalysis.CSharp to 5.3.0
 - Dependencies - Updated Philips.CodeAnalysis.DuplicateCodeAnalyzer to 1.11.1
 - Dependencies - Updated Philips.CodeAnalysis.MaintainabilityAnalyzers to 1.11.0
+- Dependencies - Updated SonarAnalyzer.CSharp to 10.23.0.137933
 ### Removed
 ### Deployment Changes
 
