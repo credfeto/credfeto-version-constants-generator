@@ -10,6 +10,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Fixed
 ### Changed
 - Dependencies - Updated Credfeto.Enumeration to 1.2.140.1751
+- Dependencies - Updated Microsoft.CodeAnalysis.Analyzers to 5.3.0
 ### Removed
 ### Deployment Changes
 
