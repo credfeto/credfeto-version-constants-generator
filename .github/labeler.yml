@@ -11,9 +11,9 @@
 "Config Change":
  - any: [ 'src/**/*.json', '!src/global.json' ]
 "credfeto-version-information-example-tests":
- - any: [ 'src/$Credfeto.Version.Information.Example.Tests/**/*' ]
+ - any: [ 'src/Credfeto.Version.Information.Example.Tests/**/*' ]
 "credfeto-version-information-generator":
- - any: [ 'src/$Credfeto.Version.Information.Generator/**/*' ]
+ - any: [ 'src/Credfeto.Version.Information.Generator/**/*' ]
 "dotnet":
  - any: [ 'src/**/*.csproj' ]
 "Editorconfig":
