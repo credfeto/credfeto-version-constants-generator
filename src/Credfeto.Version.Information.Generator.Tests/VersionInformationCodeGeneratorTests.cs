@@ -18,25 +18,7 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
         IReadOnlyDictionary<string, string>? globalOptions = null
     )
     {
-        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-
-        CSharpCompilation compilation = CSharpCompilation.Create(
-            assemblyName: assemblyName,
-            syntaxTrees: [CSharpSyntaxTree.ParseText(text: source, cancellationToken: cancellationToken)],
-            references: GetReferences(),
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-        );
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
-            additionalTexts: null,
-            parseOptions: null,
-            optionsProvider: new TestAnalyzerConfigOptionsProvider(globalOptions)
-        );
-
-        driver = driver.RunGenerators(compilation: compilation, cancellationToken: cancellationToken);
-
-        return driver.GetRunResult();
+        return RunGeneratorWithMultipleTrees(assemblyName: assemblyName, globalOptions: globalOptions, sources: source);
     }
 
     private static GeneratorDriverRunResult RunGeneratorWithMultipleTrees(
