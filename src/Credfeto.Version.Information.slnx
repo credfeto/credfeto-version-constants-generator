@@ -10,4 +10,5 @@
   </Folder>
   <Project Path="Credfeto.Version.Information.Example.Tests/Credfeto.Version.Information.Example.Tests.csproj" />
   <Project Path="Credfeto.Version.Information.Generator/Credfeto.Version.Information.Generator.csproj" />
+  <Project Path="Credfeto.Version.Information.Generator.Tests/Credfeto.Version.Information.Generator.Tests.csproj" />
 </Solution>
