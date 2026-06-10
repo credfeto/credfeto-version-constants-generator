@@ -11,6 +11,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Credfeto.Version.Information.Generator unit tests for 100% code coverage
 ### Fixed
 ### Changed
+- SDK - Updated DotNet SDK to 10.0.301
 ### Removed
 ### Deployment Changes
 <!--
