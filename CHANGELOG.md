@@ -8,15 +8,19 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ## [Unreleased]
 ### Security
 ### Added
-- Credfeto.Version.Information.Generator unit tests for 100% code coverage
 ### Fixed
 ### Changed
-- SDK - Updated DotNet SDK to 10.0.301
 ### Removed
 ### Deployment Changes
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+## [1.0.128] - 2026-06-11
+### Added
+- Credfeto.Version.Information.Generator unit tests for 100% code coverage
+### Changed
+- SDK - Updated DotNet SDK to 10.0.301
+
 ## [1.0.127] - 2026-06-04
 ### Changed
 - Dependencies - Updated Credfeto.Enumeration to 1.2.144.1906
