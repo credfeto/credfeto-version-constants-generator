@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AnalysisLevel>latest</AnalysisLevel>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
@@ -47,12 +47,9 @@
        via GetDependencyTargetPaths. On net10.0 these conflict with the framework's in-box assemblies (e.g.
        System.Collections.Immutable 9.0 vs 10.0), causing CS1685. The test project already references
        Microsoft.CodeAnalysis.CSharp directly so those NuGet assemblies are redundant here. -->
-  <Target Name="RemoveGeneratorNuGetCompileDependencies"
-          AfterTargets="ResolveProjectReferences"
-          BeforeTargets="ResolveAssemblyReferences">
+  <Target Name="RemoveGeneratorNuGetCompileDependencies" AfterTargets="ResolveProjectReferences" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup>
-      <_ResolvedProjectReferencePaths Remove="@(_ResolvedProjectReferencePaths)"
-          Condition="'%(_ResolvedProjectReferencePaths.NuGetPackageId)' != '' And '%(_ResolvedProjectReferencePaths.IncludeRuntimeDependency)' == 'false'" />
+      <_ResolvedProjectReferencePaths Remove="@(_ResolvedProjectReferencePaths)" Condition="'%(_ResolvedProjectReferencePaths.NuGetPackageId)' != '' And '%(_ResolvedProjectReferencePaths.IncludeRuntimeDependency)' == 'false'" />
     </ItemGroup>
   </Target>
   <Import Project="$(SolutionDir)UnitTests.props" Condition="Exists('$(SolutionDir)UnitTests.props')" />
@@ -76,7 +73,7 @@
   <ItemGroup>
     <PackageReference Include="AsyncFixer" Version="2.1.0" PrivateAssets="All" ExcludeAssets="runtime" />
     <PackageReference Include="codecracker.CSharp" Version="1.1.0" PrivateAssets="All" ExcludeAssets="runtime" />
-    <PackageReference Include="Credfeto.Enumeration.Source.Generation" Version="1.2.144.1906" PrivateAssets="All" ExcludeAssets="runtime" />
+    <PackageReference Include="Credfeto.Enumeration.Source.Generation" Version="1.2.145.1962" PrivateAssets="All" ExcludeAssets="runtime" />
     <PackageReference Include="CSharpIsNullAnalyzer" Version="0.1.593" PrivateAssets="all" ExcludeAssets="runtime" />
     <PackageReference Include="FunFair.CodeAnalysis" Version="7.2.0.1978" PrivateAssets="All" ExcludeAssets="runtime" />
     <PackageReference Include="FunFair.Test.Source.Generator" Version="6.2.25.2243" PrivateAssets="All" ExcludeAssets="runtime" />
