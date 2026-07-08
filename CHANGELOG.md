@@ -9,6 +9,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Security
 ### Added
 ### Fixed
+- Remove shared mutable HashSet from incremental generator to fix disappearing generated VersionInformation class on incremental builds
 ### Changed
 ### Removed
 ### Deployment Changes

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
@@ -18,62 +17,36 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 {
     private const string CLASS_NAME = "VersionInformation";
 
-    private static readonly NamespaceError IgnoreResult = new();
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        context.RegisterSourceOutput(ExtractNamespaces(context), action: GenerateVersionInformation);
-    }
-
-    private static IncrementalValuesProvider<(
-        NamespaceError Left,
-        AnalyzerConfigOptionsProvider Right
-    )> ExtractNamespaces(in IncrementalGeneratorInitializationContext context)
-    {
-        HashSet<string> assembliesToGenerateVersionInformation = new(StringComparer.Ordinal);
-
-        return context
+        IncrementalValueProvider<bool> hasNamespaces = context
             .SyntaxProvider.CreateSyntaxProvider(
                 predicate: static (syntaxNode, _) =>
                     syntaxNode is NamespaceDeclarationSyntax or FileScopedNamespaceDeclarationSyntax,
-                transform: (generatorSyntaxContext, cancellationToken) =>
-                    GetNamespace(
-                        generatorSyntaxContext: generatorSyntaxContext,
-                        generated: assembliesToGenerateVersionInformation,
-                        cancellationToken: cancellationToken
-                    )
+                transform: static (_, _) => true
             )
+            .Collect()
+            .Select(static (items, _) => !items.IsEmpty);
+
+        IncrementalValueProvider<NamespaceError> assemblyInfo = context.CompilationProvider.Select(
+            static (compilation, cancellationToken) => ExtractAssemblyInfo(compilation, cancellationToken)
+        );
+
+        IncrementalValueProvider<(NamespaceError Left, AnalyzerConfigOptionsProvider Right)> combined = assemblyInfo
+            .Combine(hasNamespaces)
+            .Select(static (pair, _) => pair.Right ? pair.Left : new NamespaceError())
             .Combine(context.AnalyzerConfigOptionsProvider);
+
+        context.RegisterSourceOutput(combined, action: GenerateVersionInformation);
     }
 
-    private static NamespaceError GetNamespace(
-        in GeneratorSyntaxContext generatorSyntaxContext,
-        HashSet<string> generated,
-        CancellationToken cancellationToken
-    )
+    private static NamespaceError ExtractAssemblyInfo(Compilation compilation, CancellationToken cancellationToken)
     {
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (
-                generatorSyntaxContext.Node
-                is not NamespaceDeclarationSyntax
-                    and not FileScopedNamespaceDeclarationSyntax
-            )
-            {
-                return IgnoreResult;
-            }
-
-            Compilation compilation = generatorSyntaxContext.SemanticModel.Compilation;
-
-            AssemblyIdentity assembly = GetAssembly(compilation);
-
-            if (!generated.Add(assembly.Name))
-            {
-                return IgnoreResult;
-            }
-
+            AssemblyIdentity assembly = compilation.Assembly.Identity;
             cancellationToken.ThrowIfCancellationRequested();
 
             ImmutableDictionary<string, string> attributes = ExtractAttributes(compilation.Assembly);
@@ -83,16 +56,8 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
         }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            return UnhandledException(generatorSyntaxContext: generatorSyntaxContext, exception: exception);
+            return new(new ErrorInfo(Location.None, exception: exception));
         }
-    }
-
-    private static NamespaceError UnhandledException(
-        in GeneratorSyntaxContext generatorSyntaxContext,
-        Exception exception
-    )
-    {
-        return new(new ErrorInfo(generatorSyntaxContext.Node.GetLocation(), exception: exception));
     }
 
     private static ImmutableDictionary<string, string> ExtractAttributes(in IAssemblySymbol assemblySymbol)
@@ -124,11 +89,6 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
         object? v = a.ConstructorArguments[0].Value;
 
         return (key: a.AttributeClass.Name, value: v?.ToString() ?? string.Empty);
-    }
-
-    private static AssemblyIdentity GetAssembly(Compilation compilation)
-    {
-        return compilation.Assembly.Identity;
     }
 
     private static void ReportException(Location location, in SourceProductionContext context, Exception exception)
