@@ -332,4 +332,62 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
 
         Assert.Empty(result.Diagnostics);
     }
+
+    [Fact]
+    public void GeneratorStillProducesSourceAfterIncrementalRebuild()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        const string SOURCE_1 = """
+            namespace TestAssembly;
+            public class C1 { }
+            """;
+
+        const string SOURCE_2 = """
+            namespace TestAssembly;
+            public class C2 { }
+            """;
+
+        CSharpCompilation compilation1 = CSharpCompilation.Create(
+            assemblyName: "TestAssembly",
+            syntaxTrees: [CSharpSyntaxTree.ParseText(text: SOURCE_1, cancellationToken: cancellationToken)],
+            references: GetReferences(),
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
+            additionalTexts: null,
+            parseOptions: null,
+            optionsProvider: new TestAnalyzerConfigOptionsProvider(null)
+        );
+
+        driver = driver.RunGenerators(compilation: compilation1, cancellationToken: cancellationToken);
+        GeneratorDriverRunResult result1 = driver.GetRunResult();
+
+        int sources1 = 0;
+
+        foreach (GeneratorRunResult r in result1.Results)
+        {
+            sources1 += r.GeneratedSources.Length;
+        }
+
+        Assert.Equal(1, sources1);
+
+        CSharpCompilation compilation2 = compilation1.AddSyntaxTrees(
+            CSharpSyntaxTree.ParseText(text: SOURCE_2, cancellationToken: cancellationToken)
+        );
+
+        driver = driver.RunGenerators(compilation: compilation2, cancellationToken: cancellationToken);
+        GeneratorDriverRunResult result2 = driver.GetRunResult();
+
+        int sources2 = 0;
+
+        foreach (GeneratorRunResult r in result2.Results)
+        {
+            sources2 += r.GeneratedSources.Length;
+        }
+
+        Assert.Equal(1, sources2);
+    }
 }
