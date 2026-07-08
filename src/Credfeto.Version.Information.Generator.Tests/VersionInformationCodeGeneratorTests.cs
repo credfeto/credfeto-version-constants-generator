@@ -443,6 +443,11 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
             cancellationToken: cancellationToken
         );
 
+        // Supply a distinct-but-equal-content options provider instance on the rerun so the assertions below
+        // actually exercise the rootnamespace/ErrorInfo value-equality caching this test guards, rather than
+        // trivially passing because the driver reused the exact same provider reference from creation.
+        driver = driver.WithUpdatedAnalyzerConfigOptions(new TestAnalyzerConfigOptionsProvider(null));
+
         driver = driver.RunGenerators(
             compilation: CreateSingleFileCompilation(
                 source: SOURCE_1_WITH_EXTRA_WHITESPACE,
