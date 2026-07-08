@@ -392,6 +392,24 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
         Assert.Equal(1, sources2);
     }
 
+    private static readonly string[] AllTrackingNames =
+    [
+        VersionInformationCodeGenerator.TRACKING_NAME_HAS_NAMESPACES,
+        VersionInformationCodeGenerator.TRACKING_NAME_ASSEMBLY_INFO,
+        VersionInformationCodeGenerator.TRACKING_NAME_ROOT_NAMESPACE,
+        VersionInformationCodeGenerator.TRACKING_NAME_COMBINED,
+    ];
+
+    private static CSharpCompilation CreateSingleFileCompilation(string source, in CancellationToken cancellationToken)
+    {
+        return CSharpCompilation.Create(
+            assemblyName: "TestAssembly",
+            syntaxTrees: [CSharpSyntaxTree.ParseText(text: source, cancellationToken: cancellationToken)],
+            references: GetReferences(),
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+    }
+
     [Fact]
     public void PipelineStepsAreCachedOnSemanticallyIrrelevantRerun()
     {
@@ -409,13 +427,6 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
             public class C1 { }
             """;
 
-        CSharpCompilation compilation1 = CSharpCompilation.Create(
-            assemblyName: "TestAssembly",
-            syntaxTrees: [CSharpSyntaxTree.ParseText(text: SOURCE_1, cancellationToken: cancellationToken)],
-            references: GetReferences(),
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-        );
-
         GeneratorDriver driver = CSharpGeneratorDriver.Create(
             generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
             additionalTexts: null,
@@ -427,32 +438,27 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
             )
         );
 
-        driver = driver.RunGenerators(compilation: compilation1, cancellationToken: cancellationToken);
-
-        CSharpCompilation compilation2 = CSharpCompilation.Create(
-            assemblyName: "TestAssembly",
-            syntaxTrees:
-            [
-                CSharpSyntaxTree.ParseText(text: SOURCE_1_WITH_EXTRA_WHITESPACE, cancellationToken: cancellationToken),
-            ],
-            references: GetReferences(),
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        driver = driver.RunGenerators(
+            compilation: CreateSingleFileCompilation(source: SOURCE_1, cancellationToken: cancellationToken),
+            cancellationToken: cancellationToken
         );
 
-        driver = driver.RunGenerators(compilation: compilation2, cancellationToken: cancellationToken);
+        driver = driver.RunGenerators(
+            compilation: CreateSingleFileCompilation(
+                source: SOURCE_1_WITH_EXTRA_WHITESPACE,
+                cancellationToken: cancellationToken
+            ),
+            cancellationToken: cancellationToken
+        );
+
         GeneratorDriverRunResult result = driver.GetRunResult();
 
         Assert.NotEmpty(result.Results);
 
-        AssertStepsCachedOrUnchanged(
-            result.Results[0].TrackedSteps[VersionInformationCodeGenerator.TRACKING_NAME_ASSEMBLY_INFO]
-        );
-        AssertStepsCachedOrUnchanged(
-            result.Results[0].TrackedSteps[VersionInformationCodeGenerator.TRACKING_NAME_ROOT_NAMESPACE]
-        );
-        AssertStepsCachedOrUnchanged(
-            result.Results[0].TrackedSteps[VersionInformationCodeGenerator.TRACKING_NAME_COMBINED]
-        );
+        foreach (string trackingName in AllTrackingNames)
+        {
+            AssertStepsCachedOrUnchanged(result.Results[0].TrackedSteps[trackingName]);
+        }
     }
 
     private static void AssertStepsCachedOrUnchanged(in ImmutableArray<IncrementalGeneratorRunStep> steps)
