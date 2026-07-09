@@ -9,16 +9,12 @@ namespace Credfeto.Version.Information.Generator.Extensions;
 
 internal static class NamespaceGenerationExtensions
 {
-    private static string GetNamespace(
-        in this NamespaceGeneration namespaceGeneration,
-        in AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider
-    )
+    private static string GetNamespace(in this NamespaceGeneration namespaceGeneration, string? rootNamespace)
     {
-        return GetRootNameSpace(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider)
-            ?? namespaceGeneration.Namespace;
+        return rootNamespace ?? namespaceGeneration.Namespace;
     }
 
-    private static string? GetRootNameSpace(AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
+    internal static string? GetRootNameSpace(AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider)
     {
         return
             analyzerConfigOptionsProvider.GlobalOptions.TryGetValue(key: "build_property.rootnamespace", out string? ns)
@@ -27,14 +23,9 @@ internal static class NamespaceGenerationExtensions
             : null;
     }
 
-    private static string GetAssemblyProduct(
-        in this NamespaceGeneration namespaceGeneration,
-        in AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider
-    )
+    private static string GetAssemblyProduct(in this NamespaceGeneration namespaceGeneration, string? rootNamespace)
     {
-        return GetRootNameSpace(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider)
-            ?? GetAssemblyTitle(namespaceGeneration)
-            ?? namespaceGeneration.Namespace;
+        return rootNamespace ?? GetAssemblyTitle(namespaceGeneration) ?? namespaceGeneration.Namespace;
     }
 
     private static string? GetAssemblyTitle(in NamespaceGeneration namespaceGeneration)
@@ -59,14 +50,12 @@ internal static class NamespaceGenerationExtensions
 
     public static CodeBuilder BuildSource(
         in this NamespaceGeneration namespaceGeneration,
-        AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider,
+        string? rootNamespace,
         out string ns
     )
     {
-        ns = namespaceGeneration.GetNamespace(analyzerConfigOptionsProvider: analyzerConfigOptionsProvider);
-        string product = namespaceGeneration.GetAssemblyProduct(
-            analyzerConfigOptionsProvider: analyzerConfigOptionsProvider
-        );
+        ns = namespaceGeneration.GetNamespace(rootNamespace: rootNamespace);
+        string product = namespaceGeneration.GetAssemblyProduct(rootNamespace: rootNamespace);
         string version = RemoveGitHashFromVersion(namespaceGeneration.GetAssemblyVersion());
 
         CodeBuilder source = new();

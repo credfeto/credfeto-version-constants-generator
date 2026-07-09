@@ -10,6 +10,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 - Remove shared mutable HashSet from incremental generator to fix disappearing generated VersionInformation class on incremental builds
+- Reduce incremental generator pipeline work and fix model equality so the generator caches correctly across incremental builds
 ### Changed
 ### Removed
 ### Deployment Changes

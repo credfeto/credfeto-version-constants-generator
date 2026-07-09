@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Threading;
 using Credfeto.Version.Information.Generator.Tests.TestSupport;
 using FunFair.Test.Common;
@@ -389,5 +390,95 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
         }
 
         Assert.Equal(1, sources2);
+    }
+
+    private static readonly string[] AllTrackingNames =
+    [
+        VersionInformationCodeGenerator.TRACKING_NAME_HAS_NAMESPACES,
+        VersionInformationCodeGenerator.TRACKING_NAME_ASSEMBLY_INFO,
+        VersionInformationCodeGenerator.TRACKING_NAME_ROOT_NAMESPACE,
+        VersionInformationCodeGenerator.TRACKING_NAME_COMBINED,
+    ];
+
+    private static CSharpCompilation CreateSingleFileCompilation(string source, in CancellationToken cancellationToken)
+    {
+        return CSharpCompilation.Create(
+            assemblyName: "TestAssembly",
+            syntaxTrees: [CSharpSyntaxTree.ParseText(text: source, cancellationToken: cancellationToken)],
+            references: GetReferences(),
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+    }
+
+    [Fact]
+    public void PipelineStepsAreCachedOnSemanticallyIrrelevantRerun()
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        const string SOURCE_1 = """
+            namespace TestAssembly;
+            public class C1 { }
+            """;
+
+        const string SOURCE_1_WITH_EXTRA_WHITESPACE = """
+            namespace TestAssembly;
+
+
+            public class C1 { }
+            """;
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(
+            generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
+            additionalTexts: null,
+            parseOptions: null,
+            optionsProvider: new TestAnalyzerConfigOptionsProvider(null),
+            driverOptions: new GeneratorDriverOptions(
+                disabledOutputs: IncrementalGeneratorOutputKind.None,
+                trackIncrementalGeneratorSteps: true
+            )
+        );
+
+        driver = driver.RunGenerators(
+            compilation: CreateSingleFileCompilation(source: SOURCE_1, cancellationToken: cancellationToken),
+            cancellationToken: cancellationToken
+        );
+
+        // Supply a distinct-but-equal-content options provider instance on the rerun so the assertions below
+        // actually exercise the rootnamespace/ErrorInfo value-equality caching this test guards, rather than
+        // trivially passing because the driver reused the exact same provider reference from creation.
+        driver = driver.WithUpdatedAnalyzerConfigOptions(new TestAnalyzerConfigOptionsProvider(null));
+
+        driver = driver.RunGenerators(
+            compilation: CreateSingleFileCompilation(
+                source: SOURCE_1_WITH_EXTRA_WHITESPACE,
+                cancellationToken: cancellationToken
+            ),
+            cancellationToken: cancellationToken
+        );
+
+        GeneratorDriverRunResult result = driver.GetRunResult();
+
+        Assert.NotEmpty(result.Results);
+
+        foreach (string trackingName in AllTrackingNames)
+        {
+            AssertStepsCachedOrUnchanged(result.Results[0].TrackedSteps[trackingName]);
+        }
+    }
+
+    private static void AssertStepsCachedOrUnchanged(in ImmutableArray<IncrementalGeneratorRunStep> steps)
+    {
+        Assert.NotEmpty(steps);
+
+        foreach (IncrementalGeneratorRunStep step in steps)
+        {
+            foreach ((_, IncrementalStepRunReason reason) in step.Outputs)
+            {
+                Assert.True(
+                    reason is IncrementalStepRunReason.Cached or IncrementalStepRunReason.Unchanged,
+                    "Expected step output reason to be Cached or Unchanged"
+                );
+            }
+        }
     }
 }

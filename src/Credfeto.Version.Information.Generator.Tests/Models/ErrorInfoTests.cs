@@ -13,15 +13,15 @@ public sealed class ErrorInfoTests : TestBase
     {
         Exception exception = new InvalidOperationException("test error");
         ErrorInfo errorInfo = new(location: Location.None, exception: exception);
-        Assert.Equal(Location.None, errorInfo.Location);
+        Assert.Equal(Location.None.ToString(), errorInfo.LocationString);
     }
 
     [Fact]
-    public void ExceptionIsStoredCorrectly()
+    public void ExceptionMessageIsStoredCorrectly()
     {
         Exception exception = new InvalidOperationException("test error");
         ErrorInfo errorInfo = new(location: Location.None, exception: exception);
-        Assert.Same(exception, errorInfo.Exception);
+        Assert.Equal(exception.Message, errorInfo.ExceptionMessage);
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public sealed class ErrorInfoTests : TestBase
         const string MESSAGE = "specific error message";
         Exception exception = new InvalidOperationException(MESSAGE);
         ErrorInfo errorInfo = new(location: Location.None, exception: exception);
-        Assert.Equal(MESSAGE, errorInfo.Exception.Message);
+        Assert.Equal(MESSAGE, errorInfo.ExceptionMessage);
     }
 
     [Fact]

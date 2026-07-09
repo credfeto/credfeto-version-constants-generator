@@ -17,6 +17,11 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 {
     private const string CLASS_NAME = "VersionInformation";
 
+    public const string TRACKING_NAME_HAS_NAMESPACES = "HasNamespaces";
+    public const string TRACKING_NAME_ASSEMBLY_INFO = "AssemblyInfo";
+    public const string TRACKING_NAME_ROOT_NAMESPACE = "RootNamespace";
+    public const string TRACKING_NAME_COMBINED = "Combined";
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         IncrementalValueProvider<bool> hasNamespaces = context
@@ -26,16 +31,26 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
                 transform: static (_, _) => true
             )
             .Collect()
-            .Select(static (items, _) => !items.IsEmpty);
+            .Select(static (items, _) => !items.IsEmpty)
+            .WithTrackingName(TRACKING_NAME_HAS_NAMESPACES);
 
-        IncrementalValueProvider<NamespaceError> assemblyInfo = context.CompilationProvider.Select(
-            static (compilation, cancellationToken) => ExtractAssemblyInfo(compilation, cancellationToken)
-        );
+        IncrementalValueProvider<NamespaceError> assemblyInfo = context
+            .CompilationProvider.Select(
+                static (compilation, cancellationToken) => ExtractAssemblyInfo(compilation, cancellationToken)
+            )
+            .WithTrackingName(TRACKING_NAME_ASSEMBLY_INFO);
 
-        IncrementalValueProvider<(NamespaceError Left, AnalyzerConfigOptionsProvider Right)> combined = assemblyInfo
+        IncrementalValueProvider<string?> rootNamespace = context
+            .AnalyzerConfigOptionsProvider.Select(
+                static (provider, _) => NamespaceGenerationExtensions.GetRootNameSpace(provider)
+            )
+            .WithTrackingName(TRACKING_NAME_ROOT_NAMESPACE);
+
+        IncrementalValueProvider<(NamespaceError Left, string? Right)> combined = assemblyInfo
             .Combine(hasNamespaces)
             .Select(static (pair, _) => pair.Right ? pair.Left : new NamespaceError())
-            .Combine(context.AnalyzerConfigOptionsProvider);
+            .Combine(rootNamespace)
+            .WithTrackingName(TRACKING_NAME_COMBINED);
 
         context.RegisterSourceOutput(combined, action: GenerateVersionInformation);
     }
@@ -91,19 +106,32 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
         return (key: a.AttributeClass.Name, value: v?.ToString() ?? string.Empty);
     }
 
-    private static void ReportException(Location location, in SourceProductionContext context, Exception exception)
+    private static void ReportException(
+        in SourceProductionContext context,
+        string exceptionMessage,
+        string? exceptionStackTrace
+    )
     {
         context.ReportDiagnostic(
-            diagnostic: Diagnostic.Create(CreateUnhandledExceptionDiagnostic(exception), location: location)
+            diagnostic: Diagnostic.Create(
+                CreateUnhandledExceptionDiagnostic(
+                    exceptionMessage: exceptionMessage,
+                    exceptionStackTrace: exceptionStackTrace
+                ),
+                location: Location.None
+            )
         );
     }
 
-    private static DiagnosticDescriptor CreateUnhandledExceptionDiagnostic(Exception exception)
+    private static DiagnosticDescriptor CreateUnhandledExceptionDiagnostic(
+        string exceptionMessage,
+        string? exceptionStackTrace
+    )
     {
         return new(
             id: "VER001",
             title: "Unhandled Exception",
-            exception.Message + ' ' + exception.StackTrace,
+            exceptionMessage + ' ' + exceptionStackTrace,
             category: RuntimeVersionInformation.ToolName,
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true
@@ -112,13 +140,17 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
 
     private static void GenerateVersionInformation(
         SourceProductionContext sourceProductionContext,
-        (NamespaceError Left, AnalyzerConfigOptionsProvider Right) item
+        (NamespaceError Left, string? Right) item
     )
     {
         if (item.Left.ErrorInfo is not null)
         {
             ErrorInfo ei = item.Left.ErrorInfo.Value;
-            ReportException(location: ei.Location, context: sourceProductionContext, exception: ei.Exception);
+            ReportException(
+                context: sourceProductionContext,
+                exceptionMessage: ei.ExceptionMessage,
+                exceptionStackTrace: ei.ExceptionStackTrace
+            );
 
             return;
         }
@@ -131,20 +163,17 @@ public sealed class VersionInformationCodeGenerator : IIncrementalGenerator
         GenerateVersionInformation(
             sourceProductionContext: sourceProductionContext,
             namespaceInfo: item.Left.NamespaceInfo.Value,
-            analyzerConfigOptionsProvider: item.Right
+            rootNamespace: item.Right
         );
     }
 
     private static void GenerateVersionInformation(
         in SourceProductionContext sourceProductionContext,
         in NamespaceGeneration namespaceInfo,
-        AnalyzerConfigOptionsProvider analyzerConfigOptionsProvider
+        string? rootNamespace
     )
     {
-        CodeBuilder source = namespaceInfo.BuildSource(
-            analyzerConfigOptionsProvider: analyzerConfigOptionsProvider,
-            out string ns
-        );
+        CodeBuilder source = namespaceInfo.BuildSource(rootNamespace: rootNamespace, out string ns);
 
         sourceProductionContext.AddSource($"{ns}.{CLASS_NAME}.generated.cs", sourceText: source.Text);
     }
