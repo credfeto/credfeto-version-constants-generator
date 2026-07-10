@@ -13,6 +13,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Reduce incremental generator pipeline work and fix model equality so the generator caches correctly across incremental builds
 - Escape attribute values emitted into generated source to prevent invalid C# when values contain quotes, backslashes, or newlines
 ### Changed
+- Reduced allocations in CodeBuilder by writing indentation directly to the StringBuilder instead of allocating an intermediate padded string
 ### Removed
 ### Deployment Changes
 <!--
