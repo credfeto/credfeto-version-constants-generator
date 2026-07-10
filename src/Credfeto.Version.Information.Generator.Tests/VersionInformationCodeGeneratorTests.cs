@@ -212,6 +212,103 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
     }
 
     [Fact]
+    public void GeneratorEscapesDoubleQuoteInCompanyAttribute()
+    {
+        const string SOURCE = """
+            using System.Reflection;
+            [assembly: AssemblyCompany("Acme \"Corp\"")]
+            namespace TestAssembly;
+            public class TestClass { }
+            """;
+
+        GeneratorDriverRunResult result = RunGenerator(source: SOURCE, assemblyName: "TestAssembly");
+
+        Assert.NotEmpty(result.Results);
+        Assert.NotEmpty(result.Results[0].GeneratedSources);
+
+        SourceText generatedText = result.Results[0].GeneratedSources[0].SourceText;
+        string generated = generatedText.ToString();
+        string expectedLiteral = SymbolDisplay.FormatLiteral("Acme \"Corp\"", quote: true);
+        Assert.Contains($"Company = {expectedLiteral}", generated, StringComparison.Ordinal);
+
+        AssertGeneratedSourceCompilesWithoutErrors(originalSource: SOURCE, generatedSource: generatedText.ToString());
+    }
+
+    [Fact]
+    public void GeneratorEscapesBackslashInCopyrightAttribute()
+    {
+        const string SOURCE = """
+            using System.Reflection;
+            [assembly: AssemblyCopyright("Copyright \\Acme Corp")]
+            namespace TestAssembly;
+            public class TestClass { }
+            """;
+
+        GeneratorDriverRunResult result = RunGenerator(source: SOURCE, assemblyName: "TestAssembly");
+
+        Assert.NotEmpty(result.Results);
+        Assert.NotEmpty(result.Results[0].GeneratedSources);
+
+        SourceText generatedText = result.Results[0].GeneratedSources[0].SourceText;
+        string generated = generatedText.ToString();
+        string expectedLiteral = SymbolDisplay.FormatLiteral("Copyright \\Acme Corp", quote: true);
+        Assert.Contains($"Copyright = {expectedLiteral}", generated, StringComparison.Ordinal);
+
+        AssertGeneratedSourceCompilesWithoutErrors(originalSource: SOURCE, generatedSource: generatedText.ToString());
+    }
+
+    [Fact]
+    public void GeneratorEscapesNewlineInInformationalVersionAttribute()
+    {
+        const string SOURCE = """
+            using System.Reflection;
+            [assembly: AssemblyInformationalVersion("1.0.0\nWithNewline")]
+            namespace TestAssembly;
+            public class TestClass { }
+            """;
+
+        GeneratorDriverRunResult result = RunGenerator(source: SOURCE, assemblyName: "TestAssembly");
+
+        Assert.NotEmpty(result.Results);
+        Assert.NotEmpty(result.Results[0].GeneratedSources);
+
+        SourceText generatedText = result.Results[0].GeneratedSources[0].SourceText;
+        string generated = generatedText.ToString();
+        string expectedLiteral = SymbolDisplay.FormatLiteral("1.0.0\nWithNewline", quote: true);
+        Assert.Contains($"Version = {expectedLiteral}", generated, StringComparison.Ordinal);
+
+        AssertGeneratedSourceCompilesWithoutErrors(originalSource: SOURCE, generatedSource: generatedText.ToString());
+    }
+
+    private static void AssertGeneratedSourceCompilesWithoutErrors(string originalSource, string generatedSource)
+    {
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+
+        CSharpCompilation compilation = CSharpCompilation.Create(
+            assemblyName: "TestAssembly",
+            syntaxTrees:
+            [
+                CSharpSyntaxTree.ParseText(text: originalSource, cancellationToken: cancellationToken),
+                CSharpSyntaxTree.ParseText(text: generatedSource, cancellationToken: cancellationToken),
+            ],
+            references: GetReferences(),
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+
+        List<Diagnostic> errors = [];
+
+        foreach (Diagnostic diagnostic in compilation.GetDiagnostics(cancellationToken))
+        {
+            if (diagnostic.Severity == DiagnosticSeverity.Error)
+            {
+                errors.Add(diagnostic);
+            }
+        }
+
+        Assert.Empty(errors);
+    }
+
+    [Fact]
     public void DuplicateNamespacesProduceOnlyOneGeneratedFile()
     {
         const string SOURCE_1 = """

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace Credfeto.Version.Information.Generator.Builders;
 
@@ -18,6 +19,6 @@ internal static class SourceAttributeExtensions
 
     public static CodeBuilder AppendPublicConstant(this CodeBuilder source, string key, string value)
     {
-        return source.AppendLine($"public const string {key} = \"{value}\";");
+        return source.AppendLine($"public const string {key} = {SymbolDisplay.FormatLiteral(value, quote: true)};");
     }
 }
