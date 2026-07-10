@@ -97,10 +97,18 @@ internal static class NamespaceGenerationExtensions
     {
         foreach (string key in attributes.Keys)
         {
-            string value = attributes[key];
+            string value = SanitiseCommentValue(attributes[key]);
 
             source.AppendLine($"// {key} = {value}");
         }
+    }
+
+    private static string SanitiseCommentValue(string value)
+    {
+        return value
+            .Replace(oldValue: "\r\n", newValue: "\\r\\n")
+            .Replace(oldValue: "\r", newValue: "\\r")
+            .Replace(oldValue: "\n", newValue: "\\n");
     }
 
     private static string RemoveGitHashFromVersion(string source)
