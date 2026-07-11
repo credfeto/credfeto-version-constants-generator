@@ -53,7 +53,7 @@ public sealed class CodeBuilder
             return this.AppendBlankLine();
         }
 
-        this._stringBuilder.Append(this.IndentCharacters()).AppendLine(text);
+        this._stringBuilder.Append(' ', 4 * this._indent).AppendLine(text);
 
         return this;
     }
@@ -68,13 +68,6 @@ public sealed class CodeBuilder
         this.AppendLine(text);
 
         return new Indent(this, start: start, end: end);
-    }
-
-    private string IndentCharacters()
-    {
-        int indentCharacters = 4 * this._indent;
-
-        return string.Empty.PadLeft(indentCharacters);
     }
 
     private sealed class Indent : IDisposable
