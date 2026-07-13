@@ -14,6 +14,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Escape attribute values emitted into generated source to prevent invalid C# when values contain quotes, backslashes, or newlines
 ### Changed
 - Reduced allocations in CodeBuilder by writing indentation directly to the StringBuilder instead of allocating an intermediate padded string
+- Dependencies - Updated Meziantou.Analyzer to 3.0.122
 ### Removed
 ### Deployment Changes
 <!--
