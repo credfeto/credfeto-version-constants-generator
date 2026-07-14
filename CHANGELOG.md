@@ -12,6 +12,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Remove shared mutable HashSet from incremental generator to fix disappearing generated VersionInformation class on incremental builds
 - Reduce incremental generator pipeline work and fix model equality so the generator caches correctly across incremental builds
 - Escape attribute values emitted into generated source to prevent invalid C# when values contain quotes, backslashes, or newlines
+- Assembly attribute edits in a separate syntax tree do not invalidate the cached namespace transform, leaving stale Version/Product/Company/Copyright constants (#112)
 ### Changed
 - Reduced allocations in CodeBuilder by writing indentation directly to the StringBuilder instead of allocating an intermediate padded string
 - Dependencies - Updated Meziantou.Analyzer to 3.0.122
