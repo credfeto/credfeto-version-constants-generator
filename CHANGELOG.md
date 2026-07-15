@@ -10,12 +10,15 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
-- SDK - Updated DotNet SDK to 10.0.302
 ### Removed
 ### Deployment Changes
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+## [1.0.135] - 2026-07-15
+### Changed
+- SDK - Updated DotNet SDK to 10.0.302
+
 ## [1.0.134] - 2026-07-15
 ### Fixed
 - Remove shared mutable HashSet from incremental generator to fix disappearing generated VersionInformation class on incremental builds
