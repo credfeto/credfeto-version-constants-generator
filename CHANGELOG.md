@@ -9,6 +9,14 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Security
 ### Added
 ### Fixed
+### Changed
+### Removed
+### Deployment Changes
+<!--
+Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
+-->
+## [1.0.134] - 2026-07-15
+### Fixed
 - Remove shared mutable HashSet from incremental generator to fix disappearing generated VersionInformation class on incremental builds
 - Reduce incremental generator pipeline work and fix model equality so the generator caches correctly across incremental builds
 - Escape attribute values emitted into generated source to prevent invalid C# when values contain quotes, backslashes, or newlines
@@ -22,11 +30,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Dependencies - Updated FunFair.Test to 6.3.4.2441
 - Dependencies - Updated FunFair.Test.Source.Generator to 6.3.4.2441
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.7.2152
-### Removed
-### Deployment Changes
-<!--
-Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
--->
+
 ## [1.0.133] - 2026-07-05
 ### Changed
 - Dependencies - Updated Credfeto.Enumeration to 1.2.149.2059
