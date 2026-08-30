@@ -12,7 +12,8 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Security
 ### Added
 ### Fixed
-- TBD - to be finalized after review
+- Narrowed the GeneratorStripsGitHashFromVersion test assertion to only check the generated Version constant line, so the generator's DEBUG-only diagnostic dump of the raw, unstripped version is no longer mistaken for a bug
+- Corrected NuGet package metadata (IncludeAssets, xunit AOT variant) in the test projects so dotnet buildcheck passes
 ### Changed
 ### Deprecated
 ### Removed

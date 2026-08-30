@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
@@ -89,7 +89,24 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
 
         string generated = result.Results[0].GeneratedSources[0].SourceText.ToString();
         Assert.Contains("\"1.2.3.4\"", generated, StringComparison.Ordinal);
-        Assert.DoesNotContain("+abc123", generated, StringComparison.Ordinal);
+
+        string versionConstantLine = GetVersionConstantLine(generated);
+        Assert.DoesNotContain("+abc123", versionConstantLine, StringComparison.Ordinal);
+    }
+
+    private static string GetVersionConstantLine(string generated)
+    {
+        foreach (string line in generated.Split('\n'))
+        {
+            if (line.Contains("public const string Version", StringComparison.Ordinal))
+            {
+                return line;
+            }
+        }
+
+        throw new InvalidOperationException(
+            "Generated source does not contain a \"public const string Version\" line."
+        );
     }
 
     [Fact]
@@ -509,48 +526,76 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
             [assembly: AssemblyInformationalVersion("2.0.0")]
             """;
 
-        SyntaxTree namespaceTree = CSharpSyntaxTree.ParseText(text: NAMESPACE_SOURCE, cancellationToken: cancellationToken);
+        SyntaxTree namespaceTree = CSharpSyntaxTree.ParseText(
+            text: NAMESPACE_SOURCE,
+            cancellationToken: cancellationToken
+        );
         SyntaxTree attributeTreeV1 = CSharpSyntaxTree.ParseText(
             text: ATTRIBUTE_SOURCE_V1,
             cancellationToken: cancellationToken
         );
 
-        CSharpCompilation compilation1 = CSharpCompilation.Create(
-            assemblyName: "TestAssembly",
-            syntaxTrees: [namespaceTree, attributeTreeV1],
-            references: GetReferences(),
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        CSharpCompilation compilation1 = CreateTwoTreeCompilation(namespaceTree, attributeTreeV1);
+        GeneratorDriver driver = CreateGeneratorDriver();
+
+        (driver, string generated1) = RunAndGetFirstGeneratedSource(
+            driver: driver,
+            compilation: compilation1,
+            cancellationToken: cancellationToken
         );
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
-            additionalTexts: null,
-            parseOptions: null,
-            optionsProvider: new TestAnalyzerConfigOptionsProvider(null)
-        );
-
-        driver = driver.RunGenerators(compilation: compilation1, cancellationToken: cancellationToken);
-        GeneratorDriverRunResult result1 = driver.GetRunResult();
-
-        Assert.NotEmpty(result1.Results);
-        Assert.NotEmpty(result1.Results[0].GeneratedSources);
-        string generated1 = result1.Results[0].GeneratedSources[0].SourceText.ToString();
         Assert.Contains("\"1.0.0\"", generated1, StringComparison.Ordinal);
 
         SyntaxTree attributeTreeV2 = CSharpSyntaxTree.ParseText(
             text: ATTRIBUTE_SOURCE_V2,
             cancellationToken: cancellationToken
         );
-        CSharpCompilation compilation2 = compilation1.ReplaceSyntaxTree(oldTree: attributeTreeV1, newTree: attributeTreeV2);
+        CSharpCompilation compilation2 = compilation1.ReplaceSyntaxTree(
+            oldTree: attributeTreeV1,
+            newTree: attributeTreeV2
+        );
 
-        driver = driver.RunGenerators(compilation: compilation2, cancellationToken: cancellationToken);
-        GeneratorDriverRunResult result2 = driver.GetRunResult();
-
-        Assert.NotEmpty(result2.Results);
-        Assert.NotEmpty(result2.Results[0].GeneratedSources);
-        string generated2 = result2.Results[0].GeneratedSources[0].SourceText.ToString();
+        (_, string generated2) = RunAndGetFirstGeneratedSource(
+            driver: driver,
+            compilation: compilation2,
+            cancellationToken: cancellationToken
+        );
         Assert.Contains("\"2.0.0\"", generated2, StringComparison.Ordinal);
         Assert.DoesNotContain("\"1.0.0\"", generated2, StringComparison.Ordinal);
+    }
+
+    private static (GeneratorDriver Driver, string Generated) RunAndGetFirstGeneratedSource(
+        GeneratorDriver driver,
+        CSharpCompilation compilation,
+        in CancellationToken cancellationToken
+    )
+    {
+        driver = driver.RunGenerators(compilation: compilation, cancellationToken: cancellationToken);
+        GeneratorDriverRunResult result = driver.GetRunResult();
+
+        Assert.NotEmpty(result.Results);
+        Assert.NotEmpty(result.Results[0].GeneratedSources);
+
+        return (driver, result.Results[0].GeneratedSources[0].SourceText.ToString());
+    }
+
+    private static CSharpCompilation CreateTwoTreeCompilation(SyntaxTree tree1, SyntaxTree tree2)
+    {
+        return CSharpCompilation.Create(
+            assemblyName: "TestAssembly",
+            syntaxTrees: [tree1, tree2],
+            references: GetReferences(),
+            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        );
+    }
+
+    private static GeneratorDriver CreateGeneratorDriver()
+    {
+        return CSharpGeneratorDriver.Create(
+            generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
+            additionalTexts: null,
+            parseOptions: null,
+            optionsProvider: new TestAnalyzerConfigOptionsProvider(null)
+        );
     }
 
     private static readonly string[] AllTrackingNames =
