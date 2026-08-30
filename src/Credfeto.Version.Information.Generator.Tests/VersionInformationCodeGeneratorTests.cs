@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using Credfeto.Version.Information.Generator.Tests.TestSupport;
 using FunFair.Test.Common;
@@ -96,17 +97,12 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
 
     private static string GetVersionConstantLine(string generated)
     {
-        foreach (string line in generated.Split('\n'))
-        {
-            if (line.Contains("public const string Version", StringComparison.Ordinal))
-            {
-                return line;
-            }
-        }
-
-        throw new InvalidOperationException(
-            "Generated source does not contain a \"public const string Version\" line."
-        );
+        return generated
+                .Split('\n')
+                .FirstOrDefault(line => line.Contains("public const string Version", StringComparison.Ordinal))
+            ?? throw new InvalidOperationException(
+                "Generated source does not contain a \"public const string Version\" line."
+            );
     }
 
     [Fact]
@@ -535,7 +531,7 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
             cancellationToken: cancellationToken
         );
 
-        CSharpCompilation compilation1 = CreateTwoTreeCompilation(namespaceTree, attributeTreeV1);
+        CSharpCompilation compilation1 = CreateCompilation(namespaceTree, attributeTreeV1);
         GeneratorDriver driver = CreateGeneratorDriver();
 
         (driver, string generated1) = RunAndGetFirstGeneratedSource(
@@ -578,11 +574,11 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
         return (driver, result.Results[0].GeneratedSources[0].SourceText.ToString());
     }
 
-    private static CSharpCompilation CreateTwoTreeCompilation(SyntaxTree tree1, SyntaxTree tree2)
+    private static CSharpCompilation CreateCompilation(params SyntaxTree[] trees)
     {
         return CSharpCompilation.Create(
             assemblyName: "TestAssembly",
-            syntaxTrees: [tree1, tree2],
+            syntaxTrees: trees,
             references: GetReferences(),
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
         );
