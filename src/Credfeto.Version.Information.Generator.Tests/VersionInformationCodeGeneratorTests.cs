@@ -427,8 +427,9 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
             public class C2 { }
             """;
 
-        CSharpCompilation compilation1 = CreateCompilation(
-            CSharpSyntaxTree.ParseText(text: SOURCE_1, cancellationToken: cancellationToken)
+        CSharpCompilation compilation1 = CreateSingleFileCompilation(
+            source: SOURCE_1,
+            cancellationToken: cancellationToken
         );
         GeneratorDriver driver = CreateGeneratorDriver();
 
@@ -548,13 +549,17 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
         );
     }
 
-    private static GeneratorDriver CreateGeneratorDriver(IReadOnlyDictionary<string, string>? globalOptions = null)
+    private static GeneratorDriver CreateGeneratorDriver(
+        IReadOnlyDictionary<string, string>? globalOptions = null,
+        GeneratorDriverOptions? driverOptions = null
+    )
     {
         return CSharpGeneratorDriver.Create(
             generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
             additionalTexts: null,
             parseOptions: null,
-            optionsProvider: new TestAnalyzerConfigOptionsProvider(globalOptions)
+            optionsProvider: new TestAnalyzerConfigOptionsProvider(globalOptions),
+            driverOptions: driverOptions ?? new GeneratorDriverOptions()
         );
     }
 
@@ -588,11 +593,7 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
             public class C1 { }
             """;
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
-            additionalTexts: null,
-            parseOptions: null,
-            optionsProvider: new TestAnalyzerConfigOptionsProvider(null),
+        GeneratorDriver driver = CreateGeneratorDriver(
             driverOptions: new GeneratorDriverOptions(
                 disabledOutputs: IncrementalGeneratorOutputKind.None,
                 trackIncrementalGeneratorSteps: true
