@@ -1,14 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Credfeto.Version.Information.Generator.Tests.TestSupport;
 using FunFair.Test.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
 
@@ -33,26 +30,13 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
     {
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
-        List<SyntaxTree> trees = [];
-
-        foreach (string source in sources)
-        {
-            trees.Add(CSharpSyntaxTree.ParseText(text: source, cancellationToken: cancellationToken));
-        }
-
-        CSharpCompilation compilation = CSharpCompilation.Create(
-            assemblyName: assemblyName,
-            syntaxTrees: trees,
-            references: GetReferences(),
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        SyntaxTree[] trees = Array.ConvertAll(
+            sources,
+            source => CSharpSyntaxTree.ParseText(text: source, cancellationToken: cancellationToken)
         );
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
-            additionalTexts: null,
-            parseOptions: null,
-            optionsProvider: new TestAnalyzerConfigOptionsProvider(globalOptions)
-        );
+        CSharpCompilation compilation = CreateCompilation(assemblyName, trees);
+        GeneratorDriver driver = CreateGeneratorDriver(globalOptions);
 
         driver = driver.RunGenerators(compilation: compilation, cancellationToken: cancellationToken);
 
@@ -76,7 +60,7 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
     }
 
     [Fact]
-    public async Task GeneratorStripsGitHashFromVersion()
+    public void GeneratorStripsGitHashFromVersion()
     {
         const string SOURCE = """
             using System.Reflection;
@@ -91,25 +75,8 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
         Assert.NotEmpty(result.Results[0].GeneratedSources);
 
         string generated = result.Results[0].GeneratedSources[0].SourceText.ToString();
-
-        Assert.Equal("1.2.3.4", await GetVersionConstantValueAsync(generated));
-    }
-
-    private static async Task<string> GetVersionConstantValueAsync(string generated)
-    {
-        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
-        SyntaxTree tree = CSharpSyntaxTree.ParseText(text: generated, cancellationToken: cancellationToken);
-        SyntaxNode root = await tree.GetRootAsync(cancellationToken);
-
-        VariableDeclaratorSyntax declarator = root.DescendantNodes()
-            .OfType<VariableDeclaratorSyntax>()
-            .Single(declaration => StringComparer.Ordinal.Equals(declaration.Identifier.Text, "Version"));
-
-        LiteralExpressionSyntax literal =
-            declarator.Initializer?.Value as LiteralExpressionSyntax
-            ?? throw new InvalidOperationException("Version constant declarator has no literal initializer.");
-
-        return literal.Token.ValueText;
+        string expectedLiteral = SymbolDisplay.FormatLiteral("1.2.3.4", quote: true);
+        Assert.Contains($"Version = {expectedLiteral}", generated, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -304,15 +271,9 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
     {
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
 
-        CSharpCompilation compilation = CSharpCompilation.Create(
-            assemblyName: "TestAssembly",
-            syntaxTrees:
-            [
-                CSharpSyntaxTree.ParseText(text: originalSource, cancellationToken: cancellationToken),
-                CSharpSyntaxTree.ParseText(text: generatedSource, cancellationToken: cancellationToken),
-            ],
-            references: GetReferences(),
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        CSharpCompilation compilation = CreateCompilation(
+            CSharpSyntaxTree.ParseText(text: originalSource, cancellationToken: cancellationToken),
+            CSharpSyntaxTree.ParseText(text: generatedSource, cancellationToken: cancellationToken)
         );
 
         List<Diagnostic> errors = [];
@@ -574,21 +535,26 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
 
     private static CSharpCompilation CreateCompilation(params SyntaxTree[] trees)
     {
+        return CreateCompilation(assemblyName: "TestAssembly", trees: trees);
+    }
+
+    private static CSharpCompilation CreateCompilation(string assemblyName, params SyntaxTree[] trees)
+    {
         return CSharpCompilation.Create(
-            assemblyName: "TestAssembly",
+            assemblyName: assemblyName,
             syntaxTrees: trees,
             references: GetReferences(),
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
         );
     }
 
-    private static GeneratorDriver CreateGeneratorDriver()
+    private static GeneratorDriver CreateGeneratorDriver(IReadOnlyDictionary<string, string>? globalOptions = null)
     {
         return CSharpGeneratorDriver.Create(
             generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
             additionalTexts: null,
             parseOptions: null,
-            optionsProvider: new TestAnalyzerConfigOptionsProvider(null)
+            optionsProvider: new TestAnalyzerConfigOptionsProvider(globalOptions)
         );
     }
 
@@ -602,12 +568,7 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
 
     private static CSharpCompilation CreateSingleFileCompilation(string source, in CancellationToken cancellationToken)
     {
-        return CSharpCompilation.Create(
-            assemblyName: "TestAssembly",
-            syntaxTrees: [CSharpSyntaxTree.ParseText(text: source, cancellationToken: cancellationToken)],
-            references: GetReferences(),
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
-        );
+        return CreateCompilation(CSharpSyntaxTree.ParseText(text: source, cancellationToken: cancellationToken));
     }
 
     [Fact]
