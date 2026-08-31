@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Credfeto.Version.Information.Generator.Tests.TestSupport;
 using FunFair.Test.Common;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using Xunit;
 
@@ -74,7 +76,7 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
     }
 
     [Fact]
-    public void GeneratorStripsGitHashFromVersion()
+    public async Task GeneratorStripsGitHashFromVersion()
     {
         const string SOURCE = """
             using System.Reflection;
@@ -89,20 +91,25 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
         Assert.NotEmpty(result.Results[0].GeneratedSources);
 
         string generated = result.Results[0].GeneratedSources[0].SourceText.ToString();
-        Assert.Contains("\"1.2.3.4\"", generated, StringComparison.Ordinal);
 
-        string versionConstantLine = GetVersionConstantLine(generated);
-        Assert.DoesNotContain("+abc123", versionConstantLine, StringComparison.Ordinal);
+        Assert.Equal("1.2.3.4", await GetVersionConstantValueAsync(generated));
     }
 
-    private static string GetVersionConstantLine(string generated)
+    private static async Task<string> GetVersionConstantValueAsync(string generated)
     {
-        return generated
-                .Split('\n')
-                .FirstOrDefault(line => line.Contains("public const string Version", StringComparison.Ordinal))
-            ?? throw new InvalidOperationException(
-                "Generated source does not contain a \"public const string Version\" line."
-            );
+        CancellationToken cancellationToken = TestContext.Current.CancellationToken;
+        SyntaxTree tree = CSharpSyntaxTree.ParseText(text: generated, cancellationToken: cancellationToken);
+        SyntaxNode root = await tree.GetRootAsync(cancellationToken);
+
+        VariableDeclaratorSyntax declarator = root.DescendantNodes()
+            .OfType<VariableDeclaratorSyntax>()
+            .Single(declaration => StringComparer.Ordinal.Equals(declaration.Identifier.Text, "Version"));
+
+        LiteralExpressionSyntax literal =
+            declarator.Initializer?.Value as LiteralExpressionSyntax
+            ?? throw new InvalidOperationException("Version constant declarator has no literal initializer.");
+
+        return literal.Token.ValueText;
     }
 
     [Fact]
@@ -459,19 +466,10 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
             public class C2 { }
             """;
 
-        CSharpCompilation compilation1 = CSharpCompilation.Create(
-            assemblyName: "TestAssembly",
-            syntaxTrees: [CSharpSyntaxTree.ParseText(text: SOURCE_1, cancellationToken: cancellationToken)],
-            references: GetReferences(),
-            options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+        CSharpCompilation compilation1 = CreateCompilation(
+            CSharpSyntaxTree.ParseText(text: SOURCE_1, cancellationToken: cancellationToken)
         );
-
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(
-            generators: [new VersionInformationCodeGenerator().AsSourceGenerator()],
-            additionalTexts: null,
-            parseOptions: null,
-            optionsProvider: new TestAnalyzerConfigOptionsProvider(null)
-        );
+        GeneratorDriver driver = CreateGeneratorDriver();
 
         driver = driver.RunGenerators(compilation: compilation1, cancellationToken: cancellationToken);
         GeneratorDriverRunResult result1 = driver.GetRunResult();
