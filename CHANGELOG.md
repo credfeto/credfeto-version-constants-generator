@@ -12,10 +12,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Security
 ### Added
 ### Fixed
-- Narrowed the GeneratorStripsGitHashFromVersion test assertion to only check the generated Version constant line, so the generator's DEBUG-only diagnostic dump of the raw, unstripped version is no longer mistaken for a bug
-- Corrected NuGet package metadata (IncludeAssets, xunit AOT variant) in the test projects so dotnet buildcheck passes
 ### Changed
-- SDK - Updated DotNet SDK to 10.0.401
 ### Deprecated
 ### Removed
 ### Deployment Changes
@@ -23,6 +20,13 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 <!--
 Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
 -->
+
+## [1.0.137] - 2026-09-09
+### Fixed
+- Narrowed the GeneratorStripsGitHashFromVersion test assertion to only check the generated Version constant line, so the generator's DEBUG-only diagnostic dump of the raw, unstripped version is no longer mistaken for a bug
+- Corrected NuGet package metadata (IncludeAssets, xunit AOT variant) in the test projects so dotnet buildcheck passes
+### Changed
+- SDK - Updated DotNet SDK to 10.0.401
 
 ## [1.0.136] - 2026-08-20
 ### Changed
