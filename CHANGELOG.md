@@ -20,6 +20,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Dependencies - Updated Microsoft.CodeAnalysis.CSharp to 5.9.0
 - Dependencies - Updated Nullable.Extended.Analyzer to 1.16.6891
 - Dependencies - Updated Roslynator.Analyzers to 5.0.0
+- Dependencies - Updated SonarAnalyzer.CSharp to 10.34.0.3385
 ### Deprecated
 ### Removed
 ### Deployment Changes
