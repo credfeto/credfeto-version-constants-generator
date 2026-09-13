@@ -22,6 +22,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Dependencies - Updated Roslynator.Analyzers to 5.0.0
 - Dependencies - Updated SonarAnalyzer.CSharp to 10.34.0.3385
 - Dependencies - Updated FunFair.Test to 6.4.6.2749
+- Dependencies - Updated FunFair.Test.Source.Generator to 6.4.6.2749
 ### Deprecated
 ### Removed
 ### Deployment Changes
