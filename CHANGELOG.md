@@ -15,8 +15,8 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Changed
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.20.2501
 - Dependencies - Updated Meziantou.Analyzer to 3.0.317
-- Dependencies - Updated Nullable.Extended.Analyzer to 1.18.0
 - SDK - Updated DotNet SDK to 10.0.403
+- Dependencies - Updated Nullable.Extended.Analyzer to 1.18.2
 ### Deprecated
 ### Removed
 ### Deployment Changes
