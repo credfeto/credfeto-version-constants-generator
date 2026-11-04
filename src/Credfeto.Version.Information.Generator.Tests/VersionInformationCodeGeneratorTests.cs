@@ -45,7 +45,7 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
 
     private static IReadOnlyList<MetadataReference> GetReferences()
     {
-        HashSet<string> seen = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> seen = [with(StringComparer.OrdinalIgnoreCase)];
         List<MetadataReference> refs = [];
 
         foreach (System.Reflection.Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
