@@ -106,7 +106,7 @@ public sealed class CodeBuilderTests : TestBase
         Assert.True(namespaceIndex >= 0, "namespace Foo should be present in generated text");
         Assert.True(classIndex > namespaceIndex, "class Bar should appear after namespace Foo");
 
-        int lineStart = text.LastIndexOf('\n', classIndex) + 1;
+        int lineStart = text.LastIndexOf('\n', classIndex, StringComparison.Ordinal) + 1;
         string indentPart = text[lineStart..classIndex];
         Assert.True(indentPart.Length > 0, "Content inside block should be indented");
     }
@@ -157,7 +157,7 @@ public sealed class CodeBuilderTests : TestBase
         Assert.Contains("public int Value;", text, StringComparison.Ordinal);
 
         int valueIndex = text.IndexOf("public int Value;", StringComparison.Ordinal);
-        int lineStart = text.LastIndexOf('\n', valueIndex) + 1;
+        int lineStart = text.LastIndexOf('\n', valueIndex, StringComparison.Ordinal) + 1;
         string indentPart = text[lineStart..valueIndex];
         Assert.True(indentPart.Length >= 8, "Doubly-nested content should have at least 8 spaces indent");
     }
@@ -176,7 +176,7 @@ public sealed class CodeBuilderTests : TestBase
         string text = builder.Text.ToString();
 
         int afterIndex = text.IndexOf("// after block", StringComparison.Ordinal);
-        int lineStart = text.LastIndexOf('\n', afterIndex) + 1;
+        int lineStart = text.LastIndexOf('\n', afterIndex, StringComparison.Ordinal) + 1;
         string indentPart = text[lineStart..afterIndex];
         Assert.True(indentPart.Length == 0, "Content after closed block should not be indented");
     }
