@@ -199,6 +199,37 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
     }
 
     [Fact]
+    public void AssemblyAttributesWithoutSingleConstructorArgumentAreIgnored()
+    {
+        const string SOURCE = """
+            using System;
+            using System.Reflection;
+            [assembly: TestAssembly.Marker]
+            [assembly: TestAssembly.Pair("first", "second")]
+            [assembly: AssemblyCompany("Acme Corp")]
+            namespace TestAssembly;
+            [AttributeUsage(AttributeTargets.Assembly)]
+            public sealed class MarkerAttribute : Attribute { }
+            [AttributeUsage(AttributeTargets.Assembly)]
+            public sealed class PairAttribute : Attribute
+            {
+                public PairAttribute(string first, string second) { }
+            }
+            """;
+
+        GeneratorDriverRunResult result = RunGenerator(source: SOURCE, assemblyName: "TestAssembly");
+
+        Assert.Empty(result.Diagnostics);
+        Assert.NotEmpty(result.Results);
+        Assert.NotEmpty(result.Results[0].GeneratedSources);
+
+        string generated = result.Results[0].GeneratedSources[0].SourceText.ToString();
+        Assert.Contains("Company = \"Acme Corp\"", generated, StringComparison.Ordinal);
+        Assert.DoesNotContain("Marker", generated, StringComparison.Ordinal);
+        Assert.DoesNotContain("Pair", generated, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void GeneratorEscapesDoubleQuoteInCompanyAttribute()
     {
         const string SOURCE = """
