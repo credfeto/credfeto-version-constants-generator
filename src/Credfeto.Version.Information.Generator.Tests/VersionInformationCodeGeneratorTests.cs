@@ -298,6 +298,37 @@ public sealed class VersionInformationCodeGeneratorTests : TestBase
         AssertGeneratedSourceCompilesWithoutErrors(originalSource: SOURCE, generatedSource: generatedText.ToString());
     }
 
+    [Fact]
+    public void AssemblyAttributeWithSingleArrayArgumentReportsUnhandledExceptionDiagnostic()
+    {
+        const string SOURCE = """
+            using System;
+            [assembly: TestAssembly.Values(new[] { "first", "second" })]
+            namespace TestAssembly;
+            [AttributeUsage(AttributeTargets.Assembly)]
+            public sealed class ValuesAttribute : Attribute
+            {
+                public ValuesAttribute(string[] values) { }
+            }
+            """;
+
+        GeneratorDriverRunResult result = RunGenerator(source: SOURCE, assemblyName: "TestAssembly");
+
+        Diagnostic diagnostic = Assert.Single(result.Diagnostics);
+        Assert.Equal(expected: "VER001", actual: diagnostic.Id);
+        Assert.Equal(expected: DiagnosticSeverity.Error, actual: diagnostic.Severity);
+        Assert.Equal(expected: Location.None, actual: diagnostic.Location);
+
+        int totalGeneratedSources = 0;
+
+        foreach (GeneratorRunResult generatorResult in result.Results)
+        {
+            totalGeneratedSources += generatorResult.GeneratedSources.Length;
+        }
+
+        Assert.Equal(0, totalGeneratedSources);
+    }
+
     private static void AssertGeneratedSourceCompilesWithoutErrors(string originalSource, string generatedSource)
     {
         CancellationToken cancellationToken = TestContext.Current.CancellationToken;
