@@ -16,6 +16,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Dependencies - Updated Credfeto.Enumeration to 1.2.158.2511
 - SDK - Updated DotNet SDK to 11.0.100-rc.3.26522.148
 - Target .NET 11 and enable runtime-async (#139)
+- Generator now uses the shared Credfeto.SourceGeneration.Helpers package (0.0.6.369) instead of its duplicated local CodeBuilder (#136)
 ### Deprecated
 ### Removed
 ### Deployment Changes

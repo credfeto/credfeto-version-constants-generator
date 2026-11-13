@@ -2,7 +2,7 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
-using Credfeto.Version.Information.Generator.Builders;
+using Credfeto.SourceGeneration.Helpers.Builders;
 using Credfeto.Version.Information.Generator.Extensions;
 using Credfeto.Version.Information.Generator.Helpers;
 using Credfeto.Version.Information.Generator.Models;
