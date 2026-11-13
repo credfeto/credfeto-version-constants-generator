@@ -1,7 +1,9 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Reflection;
+using Credfeto.SourceGeneration.Helpers.Builders;
 using Credfeto.Version.Information.Generator.Builders;
+using Credfeto.Version.Information.Generator.Helpers;
 using Credfeto.Version.Information.Generator.Models;
 using Microsoft.CodeAnalysis.Diagnostics;
 
@@ -68,7 +70,10 @@ internal static class NamespaceGenerationExtensions
                 .AppendBlankLine()
                 .AppendLine($"namespace {ns};")
                 .AppendBlankLine()
-                .AppendGeneratedCodeAttribute()
+                .AppendGeneratedCodeAttribute(
+                    RuntimeVersionInformation.ToolName,
+                    RuntimeVersionInformation.GeneratorVersion
+                )
                 .StartBlock("internal static class VersionInformation")
         )
         {
