@@ -18,6 +18,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Generator now uses the shared Credfeto.SourceGeneration.Helpers package (0.0.6.369) instead of its duplicated local CodeBuilder (#136)
 - SDK - Updated DotNet SDK to 11.0.100
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.25.2636
+- Dependencies - Updated Meziantou.Analyzer to 3.0.339
 ### Deprecated
 ### Removed
 ### Deployment Changes
