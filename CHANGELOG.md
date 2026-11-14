@@ -17,13 +17,13 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Target .NET 11 and enable runtime-async (#139)
 - Generator now uses the shared Credfeto.SourceGeneration.Helpers package (0.0.6.369) instead of its duplicated local CodeBuilder (#136)
 - SDK - Updated DotNet SDK to 11.0.100
-- Dependencies - Updated Meziantou.Analyzer to 3.0.339
 - Dependencies - Updated Microsoft.CodeAnalysis.Analyzers to 5.12.0
 - Dependencies - Updated Microsoft.CodeAnalysis.CSharp to 5.12.0
 - Dependencies - Updated SonarAnalyzer.CSharp to 10.36.0.15337
 - Dependencies - Updated xunit.analyzers to 2.3.0
 - Dependencies - Updated xunit.v3 to 4.0.3
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.26.2691
+- Dependencies - Updated Meziantou.Analyzer to 3.0.340
 ### Deprecated
 ### Removed
 ### Deployment Changes
