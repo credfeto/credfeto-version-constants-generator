@@ -13,6 +13,16 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
+### Deprecated
+### Removed
+### Deployment Changes
+
+<!--
+Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
+-->
+
+## [1.0.143] - 2026-11-15
+### Changed
 - Target .NET 11 and enable runtime-async (#139)
 - Generator now uses the shared Credfeto.SourceGeneration.Helpers package (0.0.6.369) instead of its duplicated local CodeBuilder (#136)
 - SDK - Updated DotNet SDK to 11.0.100
@@ -25,13 +35,6 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 - Dependencies - Updated Philips.CodeAnalysis.MaintainabilityAnalyzers to 2.2.0
 - Dependencies - Updated Credfeto.Enumeration to 1.2.159.2554
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.28.2699
-### Deprecated
-### Removed
-### Deployment Changes
-
-<!--
-Releases that have at least been deployed to staging, BUT NOT necessarily released to live.  Changes should be moved from [Unreleased] into here as they are merged into the appropriate release branch
--->
 
 ## [1.0.142] - 2026-11-03
 ### Changed
