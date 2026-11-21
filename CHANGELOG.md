@@ -12,6 +12,7 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Security
 ### Added
 ### Fixed
+- Fixed buildcheck errors in test projects: added missing IncludeAssets metadata and switched to xunit.v3.aot.mtp-v2 (#133)
 ### Changed
 - Dependencies - Updated FunFair.CodeAnalysis to 7.2.31.2712
 - Dependencies - Updated SonarAnalyzer.CSharp to 10.37.0.15768
