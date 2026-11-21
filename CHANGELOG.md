@@ -13,9 +13,9 @@ Please ADD ALL Changes to the UNRELEASED SECTION and not a specific release
 ### Added
 ### Fixed
 ### Changed
-- Dependencies - Updated FunFair.CodeAnalysis to 7.2.31.2712
 - Dependencies - Updated SonarAnalyzer.CSharp to 10.37.0.15768
 - Dependencies - Updated Credfeto.Enumeration to 1.2.163.2606
+- Dependencies - Updated FunFair.CodeAnalysis to 7.2.32.2718
 ### Deprecated
 ### Removed
 ### Deployment Changes
